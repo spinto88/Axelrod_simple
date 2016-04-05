@@ -7,8 +7,9 @@ libc = C.CDLL(os.getcwd() + '/axelrod_py/libc.so')
 
 class Axl_agent(C.Structure):
     """
-    Axelrod agent: it is caracterized by f features, which can adopt q traits.
+    Axelrod agent: it is caracterized by a cultural vector feat, with f features, which each can adopt q different traits.
     """
+
     _fields_ = [('f', C.c_int),
 		('q', C.c_int),
                 ('feat', C.POINTER(C.c_int))]
@@ -23,6 +24,9 @@ class Axl_agent(C.Structure):
         self.init_agent()
 
     def init_agent(self):
+        """
+	Initialize the agent's state with a random one.
+	"""
         for i in range(0, self.f):
             self.feat[i] = rand.randint(0, self.q-1)
 

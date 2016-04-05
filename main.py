@@ -1,17 +1,21 @@
 
 from axelrod_py import *
 
-N = 1024
+N = 1000
 F = 10
 
-rand.seed(123457)
+rand.seed(123458)
 
-for q in range(10, 80, 5):
 
-    mysys = Axl_network(N, F, q, id_topology = 0.0)
+for q in range(60, 61):
 
-    mysys.evol2convergence()
-    smax, state = mysys.fragment_identifier()
+    mysys = Axl_network(N, F, q, id_topology = 0.1)
+    mysys.noise = 0.001
 
-    print q, smax
+    mysys.evolution(5000)
+
+    smax, max_state = mysys.fragment_identifier()
+
+    print q, smax, max_state
+
 

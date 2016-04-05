@@ -13,40 +13,53 @@ libc = C.CDLL(os.getcwd() + '/axelrod_py/libc.so')
 
 class Axl_network(nx.Graph, C.Structure):
 
+    """
+    Axelrod network: it has nagents axelrod agents, and an amount of noise in the dynamics of the system. This class inherites from the networkx.Graph the way to be described.
+    """
+
     _fields_ = [('nagents', C.c_int),
                 ('agent', C.POINTER(Axl_agent)),
                 ('noise', C.c_double)]
 
 
     def __init__(self, n, f, q, id_topology = 0.0, noise = 0.00):
-
+        """
+        Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
+	"""
         nx.Graph.__init__(self)
 
-        self.nagents = n
         self.id_topology = id_topology
-        self.topology_init()
-        n = self.nagents
+        self.topology_init(n)
 
-        self.agent = (Axl_agent * n)()
-        for i in range(0, n):
-            self.agent[i] = Axl_agent(f,q)
-            self.node[i] = self.agent[i]
+        self.nagents = self.number_of_nodes()
+        
+        self.agent = (Axl_agent * self.nagents)()
+        self.init_agents(f, q)
+
         self.noise = noise
-        self.init_net()
 
 
-    def topology_init(self):
+    def topology_init(self, n):
+        """
+        Initialize the network's topology
+        """
+        setop.set_topology(self, n)
 
-        setop.set_topology(self)
 
-
-    def init_net(self):
+    def init_agents(self, f, q):
+        """
+        Iniatialize the agents' state.
+        """
     
-        libc.init_net.argtypes = [C.POINTER(Axl_network), C.c_int]        
-        libc.init_net(C.byref(self), rand.randint(0, 10000))
+        for i in range(0, self.nagents):
+            self.agent[i] = Axl_agent(f, q)
+            self.node[i] = self.agent[i]
 
 
     def evolution(self, steps = 1):
+        """
+	Make steps synchronius evolutions of the system
+        """
 
         n = self.nagents
 
@@ -61,6 +74,9 @@ class Axl_network(nx.Graph, C.Structure):
 
 
     def fragment_identifier(self):
+        """
+ 	Fragment identifier: it returns the size of the biggest fragment and its state.
+        """
         
         n = self.nagents
         libc.fragment_identifier.argtypes = [Axl_network, C.POINTER(Axl_node)]
@@ -85,6 +101,10 @@ class Axl_network(nx.Graph, C.Structure):
 
     def active_links(self):
 
+        """
+	Active links: it returns True if there are active links in the system.
+        """
+
 	n = self.nagents
 	
 	libc.active_links.argtypes = [Axl_network, C.POINTER(Axl_node)]
@@ -100,10 +120,16 @@ class Axl_network(nx.Graph, C.Structure):
 
 
     def evol2convergence(self, check_steps = 100):
+        """ 
+	Evolution to convergence: the system evolves until there is no active links, checking this by check_steps. Noise must be equal to zero.
+        """
+        if self.noise > 0.00:
+            print "Convergence cannot be reach with noise in the system"
+  
+        else:
+   	    steps = 0
+    	    while self.active_links() != 0:
+                self.evolution(check_steps)
+                steps += check_steps
 
-	steps = 0
-	while self.active_links() != 0:
-            self.evolution(check_steps)
-            steps += check_steps
-
-	return steps
+	    return steps

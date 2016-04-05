@@ -1,6 +1,4 @@
-
 import ctypes as C
-
 
 class Axl_node(C.Structure):
      """
