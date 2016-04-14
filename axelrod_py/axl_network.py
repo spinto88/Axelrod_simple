@@ -19,10 +19,11 @@ class Axl_network(nx.Graph, C.Structure):
 
     _fields_ = [('nagents', C.c_int),
                 ('agent', C.POINTER(Axl_agent)),
-                ('noise', C.c_double)]
+                ('noise', C.c_double),
+		('number_of_metric_feats', C.c_int)]
 
 
-    def __init__(self, n, f, q, id_topology = 0.0, noise = 0.00):
+    def __init__(self, n, f, q, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
 	"""
@@ -37,6 +38,7 @@ class Axl_network(nx.Graph, C.Structure):
         self.init_agents(f, q)
 
         self.noise = noise
+	self.number_of_metric_feats = number_of_metric_feats
 
 
     def topology_init(self, n):

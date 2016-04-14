@@ -44,9 +44,10 @@ Axelrod network with n agents
 
 struct _axl_network
 {
-	int nagents;
-	axl_agent *agent;
-        double noise;
+	int nagents; /* Number of axelrod agents in the network */
+	axl_agent *agent; /* Vector of axelrod agents */
+        double noise; /* Rate of noise */
+        int number_of_metric_feats; /* This is the number of features which are metric. If it's larger than f, it means that all features are metric */
 };
 typedef struct _axl_network axl_network;
 #endif
