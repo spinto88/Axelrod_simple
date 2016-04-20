@@ -6,6 +6,7 @@
 #include "axelrod.h"
 #include "evolution.h"
 #include "noise.h"
+#include "adaptation.h"
 
 void evol_fast(axl_network *, axl_node *, int, int);
 

@@ -6,6 +6,7 @@ import numpy as np
 import set_topology as setop
 from axl_node import *
 from axl_agent import *
+from axl_mass_media import *
 
 
 libc = C.CDLL(os.getcwd() + '/axelrod_py/libc.so')
@@ -20,8 +21,8 @@ class Axl_network(nx.Graph, C.Structure):
     _fields_ = [('nagents', C.c_int),
                 ('agent', C.POINTER(Axl_agent)),
                 ('noise', C.c_double),
-		('number_of_metric_feats', C.c_int)]
-
+		('number_of_metric_feats', C.c_int),
+		('mass_media', Axl_mass_media)]
 
     def __init__(self, n, f, q, fraction, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
         """
@@ -36,6 +37,8 @@ class Axl_network(nx.Graph, C.Structure):
         
         self.agent = (Axl_agent * self.nagents)()
         self.init_agents(f, q, fraction)
+
+        self.mass_media = Axl_mass_media(f, q)
 
         self.noise = noise
 	self.number_of_metric_feats = number_of_metric_feats
