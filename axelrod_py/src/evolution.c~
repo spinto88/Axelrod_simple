@@ -4,8 +4,8 @@ void evolution(axl_network *mysys, int *neighbors, int seed)
 {
 	int i, j, f, r;	
         int n = mysys->nagents;
-        int diff_q;
-        double h_ab, random;
+        int diff_q, diff_frac;
+        double h_ab, random, random2, fraction;
 
         /* Struct feature which has the feature to change and the new value */
 	struct Feature
@@ -26,6 +26,7 @@ void evolution(axl_network *mysys, int *neighbors, int seed)
 
 	for(i=0;i<n;i++)
 	{ 
+	    
 		/* j is the neighbour which i interacts */
        	        j = neighbors[i];
                 
@@ -39,12 +40,26 @@ void evolution(axl_network *mysys, int *neighbors, int seed)
 		{
 
 			/* Take a random feature where the agents have a different value */
-			f = mysys->agent[i].f;	
-			r = rand() % f;
+			f = mysys->agent[i].f;
+			fraction = mysys->agent[i].fraction;
+			
+			random = (((double)rand())/RAND_MAX);	
+			
+			if((mysys->agent[j].zealot>random2)&&(mysys->agent[i].feat[0] != mysys->agent[j].feat[0])) /*condition for zealot*/
+			    r = 0;    
+			else
+			{
+			    r = rand() % f;
 				
-	  	     	while(mysys->agent[i].feat[r] == mysys->agent[j].feat[r])
-				r = (r+1)%f;
+	      	     	while(mysys->agent[i].feat[r] == mysys->agent[j].feat[r])
+				    r = (r+1)%f;
+		    }
 
+       	    random = (((double)rand())/RAND_MAX);
+        	
+        	if((mysys->agent[i].zealot>random2)&&(r==0))
+        	    continue;
+        	    	
 			Changes[i].x = r;
 			
 			/* Here we looks if f in one of metric features */
@@ -52,16 +67,18 @@ void evolution(axl_network *mysys, int *neighbors, int seed)
 			{
 				/* Differences between Q values */
 				diff_q = mysys->agent[i].feat[r] - mysys->agent[j].feat[r];
-				
+				diff_frac= (int)diff_q*fraction;
 
 				/* The new value is the actual value plus (less) a random value inside the difference */
 				if(diff_q > 0)
-					Changes[i].value = mysys->agent[i].feat[r] - (rand() % (diff_q + 1));
+					Changes[i].value = mysys->agent[j].feat[r] + (rand() % (diff_frac + 1));
 				else
 				{	
 					/* Put the difference greater than zero */
-					diff_q = (-1 * diff_q);
-					Changes[i].value = mysys->agent[i].feat[r] + (rand() % (diff_q + 1));
+					//diff_q = (-1 * diff_q);
+					diff_frac = (-1 * diff_frac);
+					
+					Changes[i].value = mysys->agent[j].feat[r] - (rand() % (diff_frac + 1));
 				}
 			}
 			/* Else (if it is not metric) take the exact feature of j */

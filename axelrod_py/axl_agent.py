@@ -13,7 +13,8 @@ class Axl_agent(C.Structure):
     _fields_ = [('f', C.c_int),
 		('q', C.c_int),
 		('fraction', C.c_double),
-                ('feat', C.POINTER(C.c_int))]
+                ('feat', C.POINTER(C.c_int)),
+        ('zealot', C.c_double)]
 
     def __init__(self, f, q, fraction):
         """

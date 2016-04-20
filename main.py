@@ -4,9 +4,12 @@ from axelrod_py import *
 N = 1024
 F = 10
 fraction = 1
+Z = N * 0.25
 
 rand.seed(123413)
 
+A=range(1024)
+zealots_list=rand.sample(1,Z)
 
 fp = open('Prueba.txt', 'a')
 fp.write('#q\tsmax\tstd\n')
