@@ -15,13 +15,12 @@ class Axl_agent(C.Structure):
 		('fraction', C.c_double),
                 ('feat', C.POINTER(C.c_int))]
 
-    def __init__(self, f, q, fraction):
+    def __init__(self, f, q):
         """
         Constructor: f number of features, q number of traits per feature.
         """
         self.f = f
         self.q = q
-        self.fraction = fraction
         self.feat = (C.c_int * f)()
         self.init_agent()
 
