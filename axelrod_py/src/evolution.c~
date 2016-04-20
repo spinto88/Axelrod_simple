@@ -52,7 +52,6 @@ void evolution(axl_network *mysys, int *neighbors, int seed)
 			{
 				/* Differences between Q values */
 				diff_q = mysys->agent[i].feat[r] - mysys->agent[j].feat[r];
-				
 
 				/* The new value is the actual value plus (less) a random value inside the difference */
 				if(diff_q > 0)
