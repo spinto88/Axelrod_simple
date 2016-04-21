@@ -24,7 +24,7 @@ class Axl_network(nx.Graph, C.Structure):
 		('number_of_metric_feats', C.c_int),
 		('mass_media', Axl_mass_media)]
 
-    def __init__(self, n, f, q, A, fraction = 0.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
+    def __init__(self, n, f, q, A = [], fraction = 0.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
 
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
