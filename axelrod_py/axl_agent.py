@@ -25,6 +25,7 @@ class Axl_agent(C.Structure):
         self.fraction = fraction
         self.feat = (C.c_int * f)()
         self.init_agent()
+        self.zealot = 0
 
     def init_agent(self):
         """
@@ -32,6 +33,7 @@ class Axl_agent(C.Structure):
 	"""
         for i in range(0, self.f):
             self.feat[i] = rand.randint(0, self.q-1)
+            
 
     def homophily(self, other):
         """

@@ -4,12 +4,11 @@ from axelrod_py import *
 N = 1024
 F = 10
 fraction = 1
-Z = N * 0.25
+Z = 0.0
 
 rand.seed(123413)
 
-A=range(1024)
-zealots_list=rand.sample(1,Z)
+A=zealots_list(N,Z)
 
 fp = open('Prueba.txt', 'a')
 fp.write('#q\tsmax\tstd\n')
@@ -21,9 +20,9 @@ for q in range(10, 100, 2):
 
     for conf in range(0, 1):
 
-        mysys = Axl_network(N, F, q, fraction, id_topology = 0.1)
+        mysys = Axl_network(N, F, q, A, fraction, id_topology = 0.1)
 
-        mysys.number_of_metric_feats = 1
+        mysys.number_of_metric_feats = 0
 
         mysys.evol2convergence()
 

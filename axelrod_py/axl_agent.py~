@@ -25,12 +25,14 @@ class Axl_agent(C.Structure):
         self.feat = (C.c_int * f)()
         self.init_agent()
 
+
     def init_agent(self):
         """
 	Initialize the agent's state with a random one.
 	"""
         for i in range(0, self.f):
             self.feat[i] = rand.randint(0, self.q-1)
+            
 
     def homophily(self, other):
         """

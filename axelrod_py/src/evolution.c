@@ -5,7 +5,7 @@ void evolution(axl_network *mysys, int *neighbors, int seed)
 	int i, j, f, r;	
         int n = mysys->nagents;
         int diff_q, diff_frac;
-        double h_ab, random, random2, fraction;
+        double h_ab, random, fraction;
 
         /* Struct feature which has the feature to change and the new value */
 	struct Feature
@@ -45,7 +45,7 @@ void evolution(axl_network *mysys, int *neighbors, int seed)
 			
 			random = (((double)rand())/RAND_MAX);	
 			
-			if((mysys->agent[j].zealot>random2)&&(mysys->agent[i].feat[0] != mysys->agent[j].feat[0])) /*condition for zealot*/
+			if((mysys->agent[j].zealot>random)&&(mysys->agent[i].feat[0] != mysys->agent[j].feat[0])) /*condition for zealot*/
 			    r = 0;    
 			else
 			{
@@ -57,7 +57,7 @@ void evolution(axl_network *mysys, int *neighbors, int seed)
 
        	    random = (((double)rand())/RAND_MAX);
         	
-        	if((mysys->agent[i].zealot>random2)&&(r==0))
+        	if((mysys->agent[i].zealot>random)&&(r==0))
         	    continue;  /*If the agent i is a zealot, it does not change the first feature*/
         	    	
 			Changes[i].x = r;

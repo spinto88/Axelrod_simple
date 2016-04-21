@@ -58,7 +58,7 @@ void evolution(axl_network *mysys, int *neighbors, int seed)
        	    random = (((double)rand())/RAND_MAX);
         	
         	if((mysys->agent[i].zealot>random2)&&(r==0))
-        	    continue;
+        	    continue;  /*If the agent i is a zealot, it does not change the first feature*/
         	    	
 			Changes[i].x = r;
 			
