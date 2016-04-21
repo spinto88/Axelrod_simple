@@ -3,16 +3,19 @@ from axelrod_py import *
 
 N = 1024
 F = 10
-fraction = 1
-Z = 0.0
 
+fraction = 1
+Z = 0.10
 rand.seed(123413)
 
 A=zealots_list(N,Z)
 
-fp = open('Prueba.txt', 'a')
+
+
+fp = open('Prueba2.txt', 'a')
 fp.write('#q\tsmax\tstd\n')
 fp.close()
+
 
 for q in range(10, 100, 2):
 
@@ -24,14 +27,20 @@ for q in range(10, 100, 2):
 
         mysys.number_of_metric_feats = 0
 
+        mysys.mass_media.b = 0.00  
+        mysys.mass_media.strategy = 0
+
         mysys.evol2convergence()
+
+#        mysys.evolution(15000)
+
+#        print mysys.mass_media.followers(mysys)
 
         smax, max_state = mysys.fragment_identifier()
 
         smax_data.append(smax)
-        
-        
-        
-    fp = open('Prueba.txt', 'a')
+     
+    fp = open('Prueba2.txt', 'a')
     fp.write(str(q) + '\t' + str(np.mean(smax_data)) + '\t' + str(np.std(smax_data)) + '\n')
     fp.close()
+ 

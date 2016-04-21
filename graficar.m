@@ -1,7 +1,7 @@
 
 curva=1
 
-data=load("Prueba.txt");
+data=load("Prueba2.txt");
 
     x=data(:,1);
     y=data(:,2);

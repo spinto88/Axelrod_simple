@@ -6,6 +6,7 @@ import numpy as np
 import set_topology as setop
 from axl_node import *
 from axl_agent import *
+from axl_mass_media import *
 
 
 libc = C.CDLL(os.getcwd() + '/axelrod_py/libc.so')
@@ -20,10 +21,11 @@ class Axl_network(nx.Graph, C.Structure):
     _fields_ = [('nagents', C.c_int),
                 ('agent', C.POINTER(Axl_agent)),
                 ('noise', C.c_double),
-		('number_of_metric_feats', C.c_int)]
-
+		('number_of_metric_feats', C.c_int),
+		('mass_media', Axl_mass_media)]
 
     def __init__(self, n, f, q, A, fraction = 0.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
+
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
 	"""
@@ -36,6 +38,8 @@ class Axl_network(nx.Graph, C.Structure):
         
         self.agent = (Axl_agent * self.nagents)()
         self.init_agents(f, q, A, fraction)
+
+        self.mass_media = Axl_mass_media(f, q)
 
         self.noise = noise
 	self.number_of_metric_feats = number_of_metric_feats
@@ -57,7 +61,7 @@ class Axl_network(nx.Graph, C.Structure):
             self.agent[i] = Axl_agent(f, q, fraction)
             if i in A:
                 self.agent[i].zealot = 1
-                self.agent[i].feat[0] = 1
+                self.agent[i].feat[0] = q-1
             
             self.node[i] = self.agent[i]
             
@@ -139,3 +143,29 @@ class Axl_network(nx.Graph, C.Structure):
                 steps += check_steps
 
 	    return steps
+
+    def image(self):
+
+        if self.id_topology < 1.0:
+
+            import matplotlib.pyplot as plt
+
+            if self.agent[0].q > 63:
+                print "Q >= 64, the number of colours available is not enough"
+
+            N = self.nagents
+            n = int(N ** 0.5)
+            matrix = []
+            for i in range(0, n):
+                row = []
+                for j in range(0, n):
+                    row.append(self.agent[(j + (i*n))].feat[0])
+                matrix.append(row)
+
+            plt.imshow(matrix, interpolation = 'nearest')
+            plt.show()
+
+        else:
+            print "The system's network is not a square lattice"
+            pass
+                    
