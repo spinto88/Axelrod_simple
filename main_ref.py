@@ -6,7 +6,7 @@
 from axelrod_py import *
 
 # Numero de agentes en el sistema
-N = 1024
+N = 2500
 
 # Numero de features
 F = 10
@@ -22,7 +22,7 @@ metric_features = 0
 fraction = 1
 
 # Fraccion de talibanes en la red
-Z = 0.10
+Z = 0.05
 
 # Inicializacion de la semilla
 rand.seed(123413)
@@ -36,11 +36,11 @@ B = 0.00
 strategy = 0
 
 # Ejemplo de barrido en q
-
+"""
 fp = open('Smax.txt', 'a')
 fp.write('#q\tsmax\tstd\n')
 fp.close()
-
+"""
 # Numero de configuraciones
 Number_of_configurations = 1
 
@@ -49,7 +49,7 @@ smax_mean = []
 smax_std = []
 
 # Valores que toma q
-qrange = range(10, 100, 2)
+qrange = range(50, 51, 2)
 
 for q in qrange:
 
@@ -79,13 +79,20 @@ for q in qrange:
         smax_data.append(smax)
     
     # Para cada q guardo el promedio del fragmento mas grande 
+    """
     fp = open('Smax.txt', 'a')
     fp.write(str(q) + '\t' + str(np.mean(smax_data)) + '\t' + str(np.std(smax_data)) + '\n')
     fp.close()
+    """
 
     smax_mean.append(np.mean(smax_data))
     smax_std.append(np.std(smax_data))
 
+    # Guarda la matriz del primer feature en un archivo fname.eps y la info en fname.txt 
+    # que se levanta en python con A = numpy.loadtxt('fname'), entonces A es la matriz
+    
+    mysys.image(fname = 'Matrix' + str(q))
+
 # Grafico
-plt.errorbar(qrange, smax_mean, smax_std)
-plt.show()
+#plt.errorbar(qrange, smax_mean, smax_std)
+#plt.show()

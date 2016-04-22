@@ -144,14 +144,15 @@ class Axl_network(nx.Graph, C.Structure):
 
 	    return steps
 
-    def image(self):
-
+    def image(self, fname = ''):
+        """
+        This method prints on screen the matrix of first features, of course the system is a square lattice.
+        It is not confident if q is larger than 63.
+        If fname is different of the null string, the matrix is save in a file with that name. This one can be loaded by numpy.loadtxt(fname).
+        """
         if self.id_topology < 1.0:
 
             import matplotlib.pyplot as plt
-
-            if self.agent[0].q > 63:
-                print "Q >= 64, the number of colours available is not enough"
 
             N = self.nagents
             n = int(N ** 0.5)
@@ -162,10 +163,40 @@ class Axl_network(nx.Graph, C.Structure):
                     row.append(self.agent[(j + (i*n))].feat[0])
                 matrix.append(row)
 
+            if fname != '':
+                np.savetxt(fname + '.txt', matrix)
+
             plt.imshow(matrix, interpolation = 'nearest')
-            plt.show()
+            plt.colorbar()
+            plt.savefig(fname + '.eps')
 
         else:
             print "The system's network is not a square lattice"
             pass
-                    
+
+    def effective_q(self):
+        """
+        Print a vector with the number of actual q's per feature.
+        For example, if all the system share the same state, the 
+        effective_q vector = [1, 1, ..., 1] of dimension f.
+        """
+
+        n = self.nagents
+        f = self.agent[0].f
+
+        effective_q = []
+
+        for i in range(0, f):
+
+            q_list = []
+            for j in range(0, n):
+                q_list.append(self.agent[j].feat[i])
+
+            aux = set(q_list)
+            effective_q.append(len(aux))
+
+        return effective_q
+
+
+
+
