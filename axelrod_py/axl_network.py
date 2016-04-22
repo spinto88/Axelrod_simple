@@ -24,7 +24,7 @@ class Axl_network(nx.Graph, C.Structure):
 		('number_of_metric_feats', C.c_int),
 		('mass_media', Axl_mass_media)]
 
-    def __init__(self, n, f, q, A = [], fraction = 0.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
+    def __init__(self, n, f, q, q_z, A = [], fraction = 0.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
 
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
@@ -37,7 +37,7 @@ class Axl_network(nx.Graph, C.Structure):
         self.nagents = self.number_of_nodes()
         
         self.agent = (Axl_agent * self.nagents)()
-        self.init_agents(f, q, A, fraction)
+        self.init_agents(f, q, q_z, A, fraction)
 
         self.mass_media = Axl_mass_media(f, q)
 
@@ -52,19 +52,30 @@ class Axl_network(nx.Graph, C.Structure):
         setop.set_topology(self, n)
 
 
-    def init_agents(self, f, q, A, fraction):
+    def init_agents(self, f, q, q_z, A, fraction):
         """
         Iniatialize the agents' state.
         """
     
         for i in range(0, self.nagents):
-            self.agent[i] = Axl_agent(f, q, fraction)
+            self.agent[i] = Axl_agent(f, q, q_z, fraction)
             if i in A:
                 self.agent[i].zealot = 1
-                self.agent[i].feat[0] = q-1
+                self.agent[i].feat[0] = q_z-1
             
             self.node[i] = self.agent[i]
             
+    def adherents_counter(self):
+        """
+        Counts the number of agents that have the same first feature q_z
+        """
+        libc.adherents_counter.argtypes = [Axl_network]
+        libc.adherents_counter.restype = C.c_float
+        
+        adherents = libc.adherents_counter(self)
+        adherents = float(adherents)/self.nagents
+        
+        return adherents
 
     def evolution(self, steps = 1):
         """

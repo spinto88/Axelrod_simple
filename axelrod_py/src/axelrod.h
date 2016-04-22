@@ -13,6 +13,7 @@ struct _axl_agent
 {
 	int f; /*!< Number of features.*/
 	int q; /*!< Number of traits per feature.*/
+	int q_z;
 	double fraction; /*Change a feature A with metric to a value in a fraction of the distance between A and B, from neighbour B. fraction = 0 normal axelrod */
 	int *feat; /*!< Cutural vector with f components.*/
 	double zealot;

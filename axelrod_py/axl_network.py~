@@ -6,6 +6,7 @@ import numpy as np
 import set_topology as setop
 from axl_node import *
 from axl_agent import *
+from axl_mass_media import *
 
 
 libc = C.CDLL(os.getcwd() + '/axelrod_py/libc.so')
@@ -20,10 +21,11 @@ class Axl_network(nx.Graph, C.Structure):
     _fields_ = [('nagents', C.c_int),
                 ('agent', C.POINTER(Axl_agent)),
                 ('noise', C.c_double),
-		('number_of_metric_feats', C.c_int)]
+		('number_of_metric_feats', C.c_int),
+		('mass_media', Axl_mass_media)]
 
+    def __init__(self, n, f, q, q_z, A = [], fraction = 0.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
 
-    def __init__(self, n, f, q, A, fraction = 0.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
 	"""
@@ -35,7 +37,9 @@ class Axl_network(nx.Graph, C.Structure):
         self.nagents = self.number_of_nodes()
         
         self.agent = (Axl_agent * self.nagents)()
-        self.init_agents(f, q, *A, fraction)
+        self.init_agents(f, q, q_z, A, fraction)
+
+        self.mass_media = Axl_mass_media(f, q)
 
         self.noise = noise
 	self.number_of_metric_feats = number_of_metric_feats
@@ -48,19 +52,30 @@ class Axl_network(nx.Graph, C.Structure):
         setop.set_topology(self, n)
 
 
-    def init_agents(self, f, q, A, fraction):
+    def init_agents(self, f, q, q_z, A, fraction):
         """
         Iniatialize the agents' state.
         """
     
         for i in range(0, self.nagents):
-            self.agent[i] = Axl_agent(f, q, fraction)
+            self.agent[i] = Axl_agent(f, q, q_z, fraction)
             if i in A:
                 self.agent[i].zealot = 1
-                self.agent[i].feat[0] = 1
+                self.agent[i].feat[0] = q-1
             
             self.node[i] = self.agent[i]
             
+    def adherents_counter(self):
+        """
+        Counts the number of agents that have the same first feature q_z
+        """
+        libc.adherents_counter.argtypes = [Axl_network]
+        libc.adherents_counter.restype = C.c_float
+        
+        adherents = libc.adherents_counter(self)
+        adherents = float(adherents)/self.nagents
+        
+        return adherents
 
     def evolution(self, steps = 1):
         """
@@ -139,3 +154,60 @@ class Axl_network(nx.Graph, C.Structure):
                 steps += check_steps
 
 	    return steps
+
+    def image(self, fname = ''):
+        """
+        This method prints on screen the matrix of first features, of course the system is a square lattice.
+        It is not confident if q is larger than 63.
+        If fname is different of the null string, the matrix is save in a file with that name. This one can be loaded by numpy.loadtxt(fname).
+        """
+        if self.id_topology < 1.0:
+
+            import matplotlib.pyplot as plt
+
+            N = self.nagents
+            n = int(N ** 0.5)
+            matrix = []
+            for i in range(0, n):
+                row = []
+                for j in range(0, n):
+                    row.append(self.agent[(j + (i*n))].feat[0])
+                matrix.append(row)
+
+            if fname != '':
+                np.savetxt(fname + '.txt', matrix)
+
+            plt.imshow(matrix, interpolation = 'nearest')
+            plt.colorbar()
+            plt.savefig(fname + '.eps')
+
+        else:
+            print "The system's network is not a square lattice"
+            pass
+
+    def effective_q(self):
+        """
+        Print a vector with the number of actual q's per feature.
+        For example, if all the system share the same state, the 
+        effective_q vector = [1, 1, ..., 1] of dimension f.
+        """
+
+        n = self.nagents
+        f = self.agent[0].f
+
+        effective_q = []
+
+        for i in range(0, f):
+
+            q_list = []
+            for j in range(0, n):
+                q_list.append(self.agent[j].feat[i])
+
+            aux = set(q_list)
+            effective_q.append(len(aux))
+
+        return effective_q
+
+
+
+

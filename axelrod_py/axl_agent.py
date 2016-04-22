@@ -12,16 +12,18 @@ class Axl_agent(C.Structure):
 
     _fields_ = [('f', C.c_int),
 		('q', C.c_int),
+                ('q_z', C.c_int),
 		('fraction', C.c_double),
                 ('feat', C.POINTER(C.c_int)),
         ('zealot', C.c_double)]
 
-    def __init__(self, f, q, fraction):
+    def __init__(self, f, q, q_z, fraction):
         """
-        Constructor: f number of features, q number of traits per feature.
+        Constructor: f number of features, q number of traits per feature, q_z number of traits of the first feature only.
         """
         self.f = f
         self.q = q
+        self.q_z = q_z   
         self.fraction = fraction
         self.feat = (C.c_int * f)()
         self.init_agent()
@@ -31,7 +33,9 @@ class Axl_agent(C.Structure):
         """
 	Initialize the agent's state with a random one.
 	"""
-        for i in range(0, self.f):
+        self.feat[0] = rand.randint(0, self.q_z-1)
+	    
+        for i in range(1, self.f):
             self.feat[i] = rand.randint(0, self.q-1)
             
 
