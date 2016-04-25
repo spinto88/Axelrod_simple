@@ -16,7 +16,7 @@ for z_aux in range(50,51,5):
         rand.seed(123413)
 
         A = zealots_list(N,Z)
-        print A
+        
         mysys = Axl_network(N, F, q, q_z, A = A, fraction = fraction, id_topology = topology)
         
         mysys.number_of_metric_feats = metric_features

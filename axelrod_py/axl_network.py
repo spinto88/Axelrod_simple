@@ -70,7 +70,7 @@ class Axl_network(nx.Graph, C.Structure):
         Counts the number of agents that have the same first feature q_z
         """
         libc.adherents_counter.argtypes = [Axl_network]
-        libc.adherents_counter.restype = C.c_float
+        libc.adherents_counter.restype = C.c_int
         
         adherents = libc.adherents_counter(self)
         adherents = float(adherents)/self.nagents
