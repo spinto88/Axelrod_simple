@@ -6,7 +6,7 @@
 from axelrod_py import *
 
 # Numero de agentes en el sistema
-N = 2500
+N = 1024
 
 # Numero de features
 F = 10

@@ -94,31 +94,45 @@ class Axl_network(nx.Graph, C.Structure):
         libc.evol_fast(C.byref(self), nodes_info, steps, rand.randint(0, 10000))
 
 
-    def fragment_identifier(self):
+    def fragment_identifier(self, clustering_radio = 0):
         """
  	Fragment identifier: it returns the size of the biggest fragment and its state.
+        It sees if the agents are neighbors and have the first feature less or equal
+	than the clustering radio.
         """
-        
+       
         n = self.nagents
-        libc.fragment_identifier.argtypes = [Axl_network, C.POINTER(Axl_node)]
+        libc.fragment_identifier.argtypes = [Axl_network, C.POINTER(Axl_node), C.c_int]
       
         nodes_info = (Axl_node * n)()
 
+        # Neighbors list built
         for i in range(0, n):
             nodes_info[i].degree = self.degree(i)
             nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
 
-        libc.fragment_identifier(self, nodes_info)
+	# This function puts in nodes_info[i].label the label of the node i, according to 
+	# the current criteria of identifing 
+        libc.fragment_identifier(self, nodes_info, clustering_radio)
 
+        # After this, the vector labels has the label of each agent
         labels = np.zeros(n)
         for i in range(0, n):
             labels[nodes_info[i].label] += 1
-
+        
+        # Size_max is the size of the biggest fragment
         size_max = labels.max()
+	# Index_max the label of the biggest fragment
         index_max = labels.argmax()
-        feats = self.agent[index_max].feat[:self.agent[index_max].f]
 
-        return labels.max(), feats
+        if clustering_radio == 0:
+            # feat is the first feature of the biggest fragment
+            feat = self.agent[index_max].feat[0]
+            return size_max, feat
+
+	else:
+	    return size_max
+
 
     def active_links(self):
 

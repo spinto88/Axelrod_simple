@@ -1,16 +1,18 @@
 #include "is_same_state.h"
 
-// Criterio de mismo estado //
-int is_same_state(axl_agent a, axl_agent b)
+int is_same_state(axl_network mysys, int node1, int node2, int clustering_radio)
 {
-	// The criterion of same state is to have exactly the same cultural state
+	/* Criterion of same state */
 
+	int diff_q;
 	double hab;
-	
-	hab = homophily(a, b);
+	axl_agent a = mysys.agent[node1];
+	axl_agent b = mysys.agent[node2];
 
-	if(hab == 1.00)
+	diff_q = abs(a.feat[0] - b.feat[0]);
+
+        if(diff_q <= clustering_radio)
 		return 1;
-	else
+	else 
 		return 0;
 }
