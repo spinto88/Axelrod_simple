@@ -4,8 +4,8 @@ N = 1024
 F = 10
 topology = 0.1
 fraction = 1
-q = 40
-q_z = 100
+q = 10000
+q_z = 10000
 
 for z_aux in range(50,51,5):
     Z =float(z_aux)/100
