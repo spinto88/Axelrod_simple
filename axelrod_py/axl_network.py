@@ -181,6 +181,7 @@ class Axl_network(nx.Graph, C.Structure):
 
             N = self.nagents
             n = int(N ** 0.5)
+            q_z = self.agent[0].q_z
             matrix = []
             for i in range(0, n):
                 row = []
@@ -191,7 +192,9 @@ class Axl_network(nx.Graph, C.Structure):
             if fname != '':
                 np.savetxt(fname + '.txt', matrix)
 
-            plt.imshow(matrix, interpolation = 'nearest')
+            figure = plt.figure(1)
+            figure.clf()
+            plt.imshow(matrix, interpolation = 'nearest', vmin = 0, vmax = q_z)
             plt.colorbar()
             plt.savefig(fname + '.eps')
 
