@@ -96,7 +96,8 @@ class Axl_network(nx.Graph, C.Structure):
 
     def fragment_identifier(self, clustering_radio = 0):
         """
- 	Fragment identifier: it returns the size of the biggest fragment and its state.
+ 	Fragment identifier: it returns the size of the biggest fragment, its state, 
+	and the cluster distribution.
         It sees if the agents are neighbors and have the first feature less or equal
 	than the clustering radio.
         """
@@ -125,14 +126,24 @@ class Axl_network(nx.Graph, C.Structure):
 	# Index_max the label of the biggest fragment
         index_max = labels.argmax()
 
+        # feat0_distribution returns a dictionary with all clusters in the system, 
+	# its first feature and size
+        feat0_distribution = []
+        feat0_distribution_size = []
+        for i in range(0, len(labels)):
+            if labels[i] != 0:
+                feat0_distribution.append({'First feature': self.agent[i].feat[0], 'Size': labels[i]})
+                feat0_distribution_size.append(labels[i])
+
         if clustering_radio == 0:
             # feat is the first feature of the biggest fragment
             feat = self.agent[index_max].feat[0]
-            return size_max, feat
+            return size_max, feat, feat0_distribution
 
 	else:
-	    return size_max
-
+            # Size of the biggest fragment and size distribution
+	    return size_max, feat0_distribution_size
+        
 
     def active_links(self):
 
@@ -224,7 +235,4 @@ class Axl_network(nx.Graph, C.Structure):
             effective_q.append(len(aux))
 
         return effective_q
-
-
-
 
