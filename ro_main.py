@@ -5,11 +5,10 @@ N = 1024
 F = 10
 topology = 0.1
 fraction = 1
-q_z = 100
+q_z = 1000
 
-for z_aux in range(10,11,5):
-    Z =float(z_aux)/100
-
+for Z in range(0,15,2):
+    # Z es el número de talibanes que se distribuyen al azar en la red   
     for metric in range(1,2,2):
         
         metric_features = metric
@@ -21,16 +20,16 @@ for z_aux in range(10,11,5):
         # Strategia del campo externo (0 es medio masivo constante en el tiempo)
         strategy = 0
 
-        fp = open('Smax_talibanes_' + str(Z) + '_metric_' + str(metric) + '.txt', 'a')
-        fp.write('#q\tsmax\tstd\n')
-        fp.close()
+        #fp = open('Smax_talibanes_' + str(Z) + '_metric_' + str(metric) + '.txt', 'a')
+        #fp.write('#q\tsmax\tstd\n')
+        #fp.close()
 
-        Number_of_configurations = 200
+        Number_of_configurations = 50
 
         smax_mean = []
         smax_std = []
 
-        qrange = range(10, 200, 2)
+        qrange = range(20, 90, 60)
 
         for q in qrange:
 
@@ -45,23 +44,29 @@ for z_aux in range(10,11,5):
                 mysys.mass_media.b = B
                 mysys.mass_media.strategy = strategy
 
-                mysys.evol2convergence()
+                # mysys.evol2convergence()
 
                 # En vez de converger le digo cuantos pasos correr
-                # mysys.evolution(15000)
-                
+                for steps in range(0,100):
+
+                    adherents = mysys.adherents_counter()
+                    
+                    fp = open('Adherentes_Z_' + str(Z) + '_metric_' + str(metric) + '_q_' + str(q) + '_conf_' + str(conf) + '.txt', 'a')
+                    fp.write(str(steps*100) + '\t' + str(adherents) + '\n')
+                    fp.close()
+                                    
+                    mysys.evolution(100)
+
                
                 # Fragmento mas grande y estado
                 smax, max_state = mysys.fragment_identifier()
                 smax_data.append(smax)
     
-            fp = open('Smax_talibanes_' + str(Z) + '_metric_' + str(metric) + '.txt', 'a')
-            fp.write(str(q) + '\t' + str(np.mean(smax_data)) + '\t' + str(np.std(smax_data)) + '\n')
-            fp.close()
+            #fp = open('Smax_talibanes_' + str(Z) + '_metric_' + str(metric) + '.txt', 'a')
+            #fp.write(str(q) + '\t' + str(np.mean(smax_data)) + '\t' + str(np.std(smax_data)) + '\n')
+            #fp.close()
 
             smax_mean.append(np.mean(smax_data))
             smax_std.append(np.std(smax_data))
 
-        # Grafico
-        plt.errorbar(qrange, smax_mean, smax_std)
-        plt.show()
+

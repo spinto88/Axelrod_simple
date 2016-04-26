@@ -23,6 +23,6 @@ for z_aux in range(50,51,5):
         
         for i in range(0,100):
         
-            mysys.evolution(200)
+            mysys.evol2convergence()
             
             print mysys.adherents_counter()

@@ -165,6 +165,7 @@ class Axl_network(nx.Graph, C.Structure):
    	    steps = 0
     	    while self.active_links() != 0:
                 self.evolution(check_steps)
+                
                 steps += check_steps
 
 	    return steps
