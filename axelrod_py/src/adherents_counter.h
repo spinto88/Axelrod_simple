@@ -4,6 +4,6 @@
 
 #include "axelrod.h"
 
-int adherents_counter(axl_network);
+int adherents_counter(axl_network,int q);
 
 #endif

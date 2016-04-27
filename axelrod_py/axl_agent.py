@@ -15,7 +15,8 @@ class Axl_agent(C.Structure):
                 ('q_z', C.c_int),
 		('fraction', C.c_double),
                 ('feat', C.POINTER(C.c_int)),
-        ('zealot', C.c_double)]
+        ('zealot', C.c_double),
+        ('vaccine', C.c_int)]
 
     def __init__(self, f, q, q_z, fraction):
         """
@@ -28,6 +29,7 @@ class Axl_agent(C.Structure):
         self.feat = (C.c_int * f)()
         self.init_agent()
         self.zealot = 0
+        self.vaccine = 0
 
     def init_agent(self):
         """

@@ -30,7 +30,8 @@ class Axl_mass_media(C.Structure):
 
 
     def init_agent(self):
-        for i in range(0,self.f):
+        
+        for i in range(1,self.f):
             self.feat[i] = rand.randint(0, self.q-1)
         self.feat[self.edit_secc] = self.edit_line
 

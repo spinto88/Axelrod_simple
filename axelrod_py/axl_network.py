@@ -65,17 +65,48 @@ class Axl_network(nx.Graph, C.Structure):
             
             self.node[i] = self.agent[i]
             
-    def adherents_counter(self):
+    def adherents_counter(self, q_z):
         """
-        Counts the number of agents that have the same first feature q_z
+        Gives number of agents with the same q for the first feature, only for the q_z given
         """
-        libc.adherents_counter.argtypes = [Axl_network]
+        libc.adherents_counter.argtypes = [Axl_network, C.c_int]
         libc.adherents_counter.restype = C.c_int
         
-        adherents = libc.adherents_counter(self)
+        adherents = libc.adherents_counter(self,q_z)
         adherents = float(adherents)/self.nagents
         
         return adherents
+    
+    def adherents_distribution(self, q_z):
+        """
+        Gives number of agents with the same q for the first feature, for all q
+        """
+        libc.adherents_counter.argtypes = [Axl_network, C.c_int]
+        libc.adherents_counter.restype = C.c_int
+        
+        adherents=[]
+        
+        for q in range(0, q_z):
+            adherents_aux = libc.adherents_counter(self, q)
+            adherents_aux = float(adherents_aux)/self.nagents
+            adherents.append([q, adherents_aux])
+        return adherents
+        
+    def vaccinate(self):
+        """
+        Takes the network and decides randomly who gets the vaccine and who does not, depending on the value of the first feature of each agent
+        """
+        q_z = self.agent[0].q_z 
+        
+        for i in range(0,self.nagents):
+        
+            aux = rand.randint(0, q_z-1)
+            
+            if(aux < self.agent[i].feat[0]):
+                self.agent[i].vaccine = 1
+            else:
+                self.agent[i].vaccine = 0
+
 
     def evolution(self, steps = 1):
         """
@@ -181,7 +212,7 @@ class Axl_network(nx.Graph, C.Structure):
 
 	    return steps
 
-    def image(self, fname = ''):
+    def image_opinion(self, fname = ''):
         """
         This method prints on screen the matrix of first features, of course the system is a square lattice.
         It is not confident if q is larger than 63.
@@ -208,11 +239,52 @@ class Axl_network(nx.Graph, C.Structure):
             figure.clf()
             plt.imshow(matrix, interpolation = 'nearest', vmin = 0, vmax = q_z)
             plt.colorbar()
-            plt.savefig(fname + '.eps')
+            plt.savefig(fname + '.png')
 
         else:
             print "The system's network is not a square lattice"
             pass
+            
+    def image_vaccinated(self, fname = ''):
+        """
+        This method prints on screen the matrix of vaccinated agents, of course the system is a square lattice.
+        It is not confident if q is larger than 63.
+        If fname is different of the null string, the matrix is save in a file with that name. This one can be loaded by numpy.loadtxt(fname).
+        """
+        if self.id_topology < 1.0:
+
+            import matplotlib.pyplot as plt
+            from matplotlib import colors
+
+            N = self.nagents
+            n = int(N ** 0.5)
+            q_z = self.agent[0].q_z
+            matrix = []
+            for i in range(0, n):
+                row = []
+                for j in range(0, n):
+                    row.append(self.agent[(j + (i*n))].vaccine)
+                matrix.append(row)
+
+            if fname != '':
+                np.savetxt(fname + '.txt', matrix)
+
+            cmap = colors.ListedColormap(['red', 'green'])
+            bounds=[0,0.1,1]
+            norm = colors.BoundaryNorm(bounds, cmap.N)
+
+            figure = plt.figure(1)
+            figure.clf()
+            plt.imshow(matrix, interpolation='nearest', origin='lower',cmap=cmap, norm=norm)
+            plt.colorbar(cmap=cmap, norm=norm, boundaries=bounds, ticks=[0, 1])
+            plt.savefig(fname + '.png')
+
+        else:
+            print "The system's network is not a square lattice"
+            pass
+            
+
+      
 
     def effective_q(self):
         """

@@ -5,10 +5,10 @@ N = 1024
 F = 10
 topology = 0.1
 fraction = 1
-q_z = 1000
+q_z = 100
 
-for Z in range(0,15,2):
-    # Z es el número de talibanes que se distribuyen al azar en la red   
+for Z in range(10,11,2):
+      
     for metric in range(1,2,2):
         
         metric_features = metric
@@ -24,12 +24,12 @@ for Z in range(0,15,2):
         #fp.write('#q\tsmax\tstd\n')
         #fp.close()
 
-        Number_of_configurations = 50
+        Number_of_configurations = 1
 
         smax_mean = []
         smax_std = []
 
-        qrange = range(20, 90, 60)
+        qrange = range(20, 30, 60)
 
         for q in qrange:
 
@@ -47,26 +47,25 @@ for Z in range(0,15,2):
                 # mysys.evol2convergence()
 
                 # En vez de converger le digo cuantos pasos correr
-                for steps in range(0,100):
+                for steps in range(0,50):
 
-                    adherents = mysys.adherents_counter()
+                    mysys.vaccinate()                    
                     
-                    fp = open('Adherentes_Z_' + str(Z) + '_metric_' + str(metric) + '_q_' + str(q) + '_conf_' + str(conf) + '.txt', 'a')
-                    fp.write(str(steps*100) + '\t' + str(adherents) + '\n')
-                    fp.close()
+                    mysys.image_opinion('network_opinion_step_' + str(steps))
+                    mysys.image_vaccinated('network_vaccinated_step_' + str(steps))
                                     
-                    mysys.evolution(100)
+                    mysys.evolution(200)
 
                
                 # Fragmento mas grande y estado
-                smax, max_state = mysys.fragment_identifier()
-                smax_data.append(smax)
+                #smax, max_state = mysys.fragment_identifier()
+                #smax_data.append(smax)
     
             #fp = open('Smax_talibanes_' + str(Z) + '_metric_' + str(metric) + '.txt', 'a')
             #fp.write(str(q) + '\t' + str(np.mean(smax_data)) + '\t' + str(np.std(smax_data)) + '\n')
             #fp.close()
 
-            smax_mean.append(np.mean(smax_data))
-            smax_std.append(np.std(smax_data))
+            #smax_mean.append(np.mean(smax_data))
+            #smax_std.append(np.std(smax_data))
 
 
