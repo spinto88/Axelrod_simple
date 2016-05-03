@@ -39,7 +39,7 @@ class Axl_agent(C.Structure):
 	    
         for i in range(1, self.f):
             self.feat[i] = rand.randint(0, self.q-1)
-            
+      
 
     def homophily(self, other):
         """

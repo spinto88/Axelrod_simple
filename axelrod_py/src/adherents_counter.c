@@ -10,7 +10,7 @@ int adherents_counter(axl_network mysys,int q)
 
 	for(i = 0; i < n; i++)
 	{
-		if(mysys.agent[i].feat[0] == q)
+		if(mysys.agent[i].feat[0] == q-1)
 			adherents++;
 	}
 

@@ -22,9 +22,10 @@ class Axl_network(nx.Graph, C.Structure):
                 ('agent', C.POINTER(Axl_agent)),
                 ('noise', C.c_double),
 		('number_of_metric_feats', C.c_int),
-		('mass_media', Axl_mass_media)]
+		('mass_media', Axl_mass_media),
+		('b', C.c_double)]
 
-    def __init__(self, n, f, q, q_z, A = [], fraction = 0.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
+    def __init__(self, n, f, q, q_z, b = 0.0, A = [], fraction = 0.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
 
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
@@ -43,6 +44,7 @@ class Axl_network(nx.Graph, C.Structure):
 
         self.noise = noise
 	self.number_of_metric_feats = number_of_metric_feats
+	self.b = b
 
 
     def topology_init(self, n):
@@ -87,9 +89,9 @@ class Axl_network(nx.Graph, C.Structure):
         adherents=[]
         
         for q in range(0, q_z):
-            adherents_aux = libc.adherents_counter(self, q)
-            adherents_aux = float(adherents_aux)/self.nagents
-            adherents.append([q, adherents_aux])
+            adherents_q = libc.adherents_counter(self, q)
+            adherents_q = float(adherents_q)/self.nagents
+            adherents.append([q, adherents_q])
         return adherents
         
     def vaccinate(self):
@@ -123,6 +125,22 @@ class Axl_network(nx.Graph, C.Structure):
             nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
 
         libc.evol_fast(C.byref(self), nodes_info, steps, rand.randint(0, 10000))
+        
+    def evolution_mf(self, steps = 1):
+        """
+	Make steps synchronius evolutions of the system
+        """
+
+        n = self.nagents
+
+        libc.evol_fast_mf.argtypes = [C.POINTER(Axl_network), C.POINTER(Axl_node), C.c_int, C.c_int]
+
+        nodes_info = (Axl_node * n)()
+        for i in range(0, n):
+            nodes_info[i].degree = self.degree(i)
+            nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
+
+        libc.evol_fast_mf(C.byref(self), nodes_info, steps, rand.randint(0, 10000))
 
 
     def fragment_identifier(self, clustering_radio = 0):
@@ -169,11 +187,11 @@ class Axl_network(nx.Graph, C.Structure):
         if clustering_radio == 0:
             # feat is the first feature of the biggest fragment
             feat = self.agent[index_max].feat[0]
-            return size_max, feat, feat0_distribution
+            return size_max#, feat, feat0_distribution
 
 	else:
             # Size of the biggest fragment and size distribution
-	    return size_max, feat0_distribution_size
+	    return size_max#, feat0_distribution_size
         
 
     def active_links(self):
