@@ -93,6 +93,18 @@ class Axl_network(nx.Graph, C.Structure):
             adherents_q = float(adherents_q)/self.nagents
             adherents.append([q, adherents_q])
         return adherents
+    
+    def vaccinated_counter(self):
+        """
+        Gives number of agents that deacided to be vaccinated
+        """
+        vaccinated = 0
+        
+        for i in range(0, self.nagents):
+            if (self.agent[i].vaccine == 0):
+                vaccinated = vaccinated + 1 
+        
+        return vaccinated    
         
     def vaccinate(self):
         """
@@ -126,7 +138,21 @@ class Axl_network(nx.Graph, C.Structure):
 
         libc.evol_fast(C.byref(self), nodes_info, steps, rand.randint(0, 10000))
         
+    def evolution_mf(self, steps = 1):
+        """
+	Make steps synchronius evolutions of the system
+        """
 
+        n = self.nagents
+
+        libc.evol_fast_mf.argtypes = [C.POINTER(Axl_network), C.POINTER(Axl_node), C.c_int, C.c_int]
+
+        nodes_info = (Axl_node * n)()
+        for i in range(0, n):
+            nodes_info[i].degree = self.degree(i)
+            nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
+
+        libc.evol_fast_mf(C.byref(self), nodes_info, steps, rand.randint(0, 10000))
 
 
     def fragment_identifier(self, clustering_radio = 0):
@@ -215,6 +241,22 @@ class Axl_network(nx.Graph, C.Structure):
                 steps += check_steps
 
 	    return steps
+	    
+	    def evol2convergence_mf(self, check_steps = 100):
+            """ 
+	    Same as evol2convergence but with mean field in the interaction
+            """
+            if self.noise > 0.00:
+                print "Convergence cannot be reach with noise in the system"
+      
+            else:
+       	    steps = 0
+        	    while self.active_links() != 0:
+                    self.evolution_mf(check_steps)
+                    
+                    steps += check_steps
+
+	        return steps    
 
     def image_opinion(self, fname = ''):
         """

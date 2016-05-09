@@ -93,6 +93,18 @@ class Axl_network(nx.Graph, C.Structure):
             adherents_q = float(adherents_q)/self.nagents
             adherents.append([q, adherents_q])
         return adherents
+    
+    def vaccinated_counter(self):
+        """
+        Gives number of agents that deacided to be vaccinated
+        """
+        vaccinated = 0
+        
+        for i in range(0, self.nagents):
+            if (self.agent[i].vaccine == 0):
+                vaccinated = vaccinated + 1 
+        
+        return vaccinated    
         
     def vaccinate(self):
         """
@@ -229,6 +241,22 @@ class Axl_network(nx.Graph, C.Structure):
                 steps += check_steps
 
 	    return steps
+	    
+    def evol2convergence_mf(self, check_steps = 100):
+        """ 
+	Same as evol2convergence but with mean field in the interaction
+        """
+        if self.noise > 0.00:
+            print "Convergence cannot be reach with noise in the system"
+      
+        else:
+       	    steps = 0
+            while self.active_links() != 0:
+                self.evolution_mf(check_steps)
+                    
+                steps += check_steps
+
+	    return steps    
 
     def image_opinion(self, fname = ''):
         """
