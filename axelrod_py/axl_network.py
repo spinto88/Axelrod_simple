@@ -25,7 +25,7 @@ class Axl_network(nx.Graph, C.Structure):
 		('mass_media', Axl_mass_media),
 		('b', C.c_double)]
 
-    def __init__(self, n, f, q, q_z, b = 0.0, A = [], fraction = 0.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
+    def __init__(self, n, f, q, q_z, b = 0.0, A = [], fraction = 1.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
 
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
@@ -67,32 +67,53 @@ class Axl_network(nx.Graph, C.Structure):
             
             self.node[i] = self.agent[i]
             
-    def adherents_counter(self, q_z):
+    def adherents_counter(self):
         """
         Gives number of agents with the same q for the first feature, only for the q_z given
         """
         libc.adherents_counter.argtypes = [Axl_network, C.c_int]
         libc.adherents_counter.restype = C.c_int
+
+        q_z = self.agent[0].q_z
         
-        adherents = libc.adherents_counter(self,q_z)
+        # The adherents have a q equal to qz-1
+        adherents = libc.adherents_counter(self, q_z-1)
         adherents = float(adherents)/self.nagents
         
         return adherents
     
-    def adherents_distribution(self, q_z):
+    def adherents_distribution(self):
         """
-        Gives number of agents with the same q for the first feature, for all q
+        Gives a number of agents with the same q for the first feature, for all q
         """
         libc.adherents_counter.argtypes = [Axl_network, C.c_int]
         libc.adherents_counter.restype = C.c_int
         
-        adherents=[]
+        q_z = self.agent[0].q_z
+        adherents = np.zeros(q_z)
         
         for q in range(0, q_z):
             adherents_q = libc.adherents_counter(self, q)
-            adherents_q = float(adherents_q)/self.nagents
-            adherents.append([q, adherents_q])
+            adherents[q] = float(adherents_q)/self.nagents
+
         return adherents
+
+    def adherents_hist(self, fname = ''):
+        
+        adherents = self.adherents_distribution()
+        q_z = self.agent[0].q_z
+
+        import matplotlib.pyplot as plt
+
+        figure = plt.figure(1)
+        figure.clf()
+
+        plt.hist(range(0, q_z), bins = q_z, weights = adherents, normed = True)
+        plt.axis([0, q_z, 0, 1.00])
+        if fname == '':
+            plt.show()
+        else:
+	    plt.savefig(fname)
     
     def vaccinated_counter(self):
         """
@@ -117,6 +138,7 @@ class Axl_network(nx.Graph, C.Structure):
             aux = rand.randint(0, q_z-1)
             
             if(aux < self.agent[i].feat[0]):
+                # 1 means that the agent is not vaccinated
                 self.agent[i].vaccine = 1
             else:
                 self.agent[i].vaccine = 0
@@ -129,30 +151,14 @@ class Axl_network(nx.Graph, C.Structure):
 
         n = self.nagents
 
+        nodes_info = (Axl_node * n)()
+        for i in range(0, n):
+            nodes_info[i].degree = self.degree(i)
+            nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
+
         libc.evol_fast.argtypes = [C.POINTER(Axl_network), C.POINTER(Axl_node), C.c_int, C.c_int]
 
-        nodes_info = (Axl_node * n)()
-        for i in range(0, n):
-            nodes_info[i].degree = self.degree(i)
-            nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
-
         libc.evol_fast(C.byref(self), nodes_info, steps, rand.randint(0, 10000))
-        
-    def evolution_mf(self, steps = 1):
-        """
-	Make steps synchronius evolutions of the system
-        """
-
-        n = self.nagents
-
-        libc.evol_fast_mf.argtypes = [C.POINTER(Axl_network), C.POINTER(Axl_node), C.c_int, C.c_int]
-
-        nodes_info = (Axl_node * n)()
-        for i in range(0, n):
-            nodes_info[i].degree = self.degree(i)
-            nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
-
-        libc.evol_fast_mf(C.byref(self), nodes_info, steps, rand.randint(0, 10000))
 
 
     def fragment_identifier(self, clustering_radio = 0):
@@ -241,22 +247,7 @@ class Axl_network(nx.Graph, C.Structure):
                 steps += check_steps
 
 	    return steps
-	    
-    def evol2convergence_mf(self, check_steps = 100):
-        """ 
-	Same as evol2convergence but with mean field in the interaction
-        """
-        if self.noise > 0.00:
-            print "Convergence cannot be reach with noise in the system"
-      
-        else:
-       	    steps = 0
-            while self.active_links() != 0:
-                self.evolution_mf(check_steps)
-                    
-                steps += check_steps
 
-	    return steps    
 
     def image_opinion(self, fname = ''):
         """
@@ -328,9 +319,7 @@ class Axl_network(nx.Graph, C.Structure):
         else:
             print "The system's network is not a square lattice"
             pass
-            
-
-      
+              
 
     def effective_q(self):
         """

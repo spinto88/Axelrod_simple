@@ -40,7 +40,12 @@ void evol_fast(axl_network *mysys, axl_node *nodes_info, int steps, int seed)
 				adaptation(mm, *(mysys), i);
 		}
 
-		evolution(mysys, neighbors, rand());
+
+		if(mysys->b == 0.00)
+			evolution(mysys, neighbors, rand());
+		else
+			evolution_mf(mysys, neighbors, rand());
+
 
                 if(mysys->noise > 0.00)
 			noise(mysys, rand());
