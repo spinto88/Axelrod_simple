@@ -25,7 +25,7 @@ class Axl_network(nx.Graph, C.Structure):
 		('mass_media', Axl_mass_media),
 		('b', C.c_double)]
 
-    def __init__(self, n, f, q, q_z, b = 0.0, A = [], fraction = 1.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
+    def __init__(self, n, f, q, q_z = 100, b = 0.0, A = [], fraction = 1.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
 
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
@@ -96,11 +96,16 @@ class Axl_network(nx.Graph, C.Structure):
             adherents_q = libc.adherents_counter(self, q)
             adherents[q] = float(adherents_q)/self.nagents
 
-        return adherents
+        average = np.average(range(0, q_z), weights = adherents)
+        desviation = 0
+        for q in range(0, q_z):
+            desviation += abs(average - q) * adherents[q]
+
+        return adherents, average, desviation
 
     def adherents_hist(self, fname = ''):
         
-        adherents = self.adherents_distribution()
+        adherents = self.adherents_distribution()[0]
         q_z = self.agent[0].q_z
 
         import matplotlib.pyplot as plt
@@ -109,7 +114,9 @@ class Axl_network(nx.Graph, C.Structure):
         figure.clf()
 
         plt.hist(range(0, q_z), bins = q_z, weights = adherents, normed = True)
-        plt.axis([0, q_z, 0, 1.00])
+        plt.axis([-0.5, q_z-0.5, 0, 1.00])
+        plt.xlabel('Q value of the first feature')
+        plt.ylabel('Normalized histogram')
         if fname == '':
             plt.show()
         else:
@@ -122,7 +129,7 @@ class Axl_network(nx.Graph, C.Structure):
         vaccinated = 0
         
         for i in range(0, self.nagents):
-            if (self.agent[i].vaccine == 0):
+            if (self.agent[i].vaccine == 1):
                 vaccinated = vaccinated + 1 
         
         return vaccinated    
@@ -138,10 +145,10 @@ class Axl_network(nx.Graph, C.Structure):
             aux = rand.randint(0, q_z-1)
             
             if(aux < self.agent[i].feat[0]):
-                # 1 means that the agent is not vaccinated
-                self.agent[i].vaccine = 1
-            else:
+                # 0 means that the agent is not vaccinated
                 self.agent[i].vaccine = 0
+            else:
+                self.agent[i].vaccine = 1
 
 
     def evolution(self, steps = 1):
@@ -248,6 +255,35 @@ class Axl_network(nx.Graph, C.Structure):
 
 	    return steps
 
+    
+    def evol2stacionary(self, check_steps = 100, epsilon = 0.05):
+
+        average_aux = 0
+        desviation_aux = 0
+        stacionary = 0
+        steps = 0
+
+        while stacionary != 1:
+
+            data2average = []
+            data2average_desv = []
+            for i in range(0, 40):
+                self.evolution(check_steps)
+                steps += check_steps
+                data2average.append(self.adherents_distribution()[1])
+                data2average_desv.append(self.adherents_distribution()[2])
+
+            average_new = np.mean(data2average)
+            desviation_new = np.mean(data2average_desv)
+
+            if abs(average_new - average_aux) < epsilon and abs(desviation_new - desviation_aux) < epsilon:
+                stacionary = 1
+            else:
+                average_aux = average_new
+                desviation_aux = desviation_new
+            
+        return steps
+    
 
     def image_opinion(self, fname = ''):
         """
@@ -276,7 +312,10 @@ class Axl_network(nx.Graph, C.Structure):
             figure.clf()
             plt.imshow(matrix, interpolation = 'nearest', vmin = 0, vmax = q_z)
             plt.colorbar()
-            plt.savefig(fname + '.png')
+            if fname != '':
+                plt.savefig(fname + '.png')
+            else:
+                plt.show()
 
         else:
             print "The system's network is not a square lattice"
@@ -314,7 +353,10 @@ class Axl_network(nx.Graph, C.Structure):
             figure.clf()
             plt.imshow(matrix, interpolation='nearest', origin='lower',cmap=cmap, norm=norm)
             plt.colorbar(cmap=cmap, norm=norm, boundaries=bounds, ticks=[0, 1])
-            plt.savefig(fname + '.png')
+            if fname != '':
+                plt.savefig(fname + '.png')
+            else:
+                plt.show()
 
         else:
             print "The system's network is not a square lattice"
