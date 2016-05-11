@@ -10,8 +10,9 @@ Qz = 100
 rand.seed(123458)
 
 for i in range(0, len(data)):
-
+     
     A = zealots_list(N, Z = int(data[i][0]))
+    
     b = data[i][1]
     tau = data[i][2]
     
@@ -19,13 +20,12 @@ for i in range(0, len(data)):
 
     average = []    
     
-    for j in range(0, int(tau / 100)):
+    for j in range(0, int(tau / 250)):
 
-        mysys.evolution(100)
+        mysys.evolution(250)
         average.append(mysys.adherents_distribution()[1])
 
     fig = plt.figure(1)
     fig.clf()
     plt.plot(average)
     plt.savefig('Z' + str(int(data[i][0])) + '_b' + str(b) + '.eps')
-
