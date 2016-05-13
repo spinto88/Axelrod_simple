@@ -51,7 +51,7 @@ class Axl_network(nx.Graph, C.Structure):
         """
         Initialize the network's topology
         """
-        setop.set_topology(self, n)
+        setop.set_topology(self, n, self.id_topology)
 
 
     def init_agents(self, f, q, q_z, A, fraction):
@@ -142,9 +142,9 @@ class Axl_network(nx.Graph, C.Structure):
         
         for i in range(0,self.nagents):
         
-            aux = rand.randint(0, q_z-1)
+            aux = rand.random()
             
-            if(aux < self.agent[i].feat[0]):
+            if(aux < float(self.agent[i].feat[0])/(q_z-1)):
                 # 0 means that the agent is not vaccinated
                 self.agent[i].vaccine = 0
             else:
@@ -256,17 +256,19 @@ class Axl_network(nx.Graph, C.Structure):
 	    return steps
 
     
-    def evol2stacionary(self, check_steps = 100, epsilon = 0.05):
+    def evol2stationary(self, check_steps = 100, epsilon = 0.05):
 
         average_aux = 0
         desviation_aux = 0
-        stacionary = 0
+        stationary = 0
         steps = 0
 
-        while stacionary != 1:
+        while stationary != 1:
 
             data2average = []
             data2average_desv = []
+            average = []
+            
             for i in range(0, 40):
                 self.evolution(check_steps)
                 steps += check_steps
@@ -277,12 +279,14 @@ class Axl_network(nx.Graph, C.Structure):
             desviation_new = np.mean(data2average_desv)
 
             if abs(average_new - average_aux) < epsilon and abs(desviation_new - desviation_aux) < epsilon:
-                stacionary = 1
+                stationary = 1
             else:
                 average_aux = average_new
                 desviation_aux = desviation_new
             
-        return steps
+            average.append(self.adherents_distribution()[1])
+            
+        return steps, average, stationary
     
 
     def image_opinion(self, fname = ''):

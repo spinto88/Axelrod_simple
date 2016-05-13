@@ -35,7 +35,7 @@ class Axl_agent(C.Structure):
         """
 	Initialize the agent's state with a random one.
 	"""
-        self.feat[0] = rand.randint(0, self.q_z-1)
+        self.feat[0] = 0#rand.randint(0, self.q_z-1)
 	    
         for i in range(1, self.f):
             self.feat[i] = rand.randint(0, self.q-1)
