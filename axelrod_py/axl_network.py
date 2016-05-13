@@ -256,7 +256,7 @@ class Axl_network(nx.Graph, C.Structure):
 	    return steps
 
     
-    def evol2stationary(self, check_steps = 200, epsilon = 0.05):
+    def evol2stationary(self, epsilon = 0.10):
         """
         This function manages the system to a stationary state, where 
         the average value of the adherents and the width of the distribution
@@ -272,23 +272,24 @@ class Axl_network(nx.Graph, C.Structure):
 
             data2average = []
             data2average_desv = []
-            for i in range(0, 50):
-                self.evolution(check_steps)
-                steps += check_steps
+            
+            self.evolution(99000)
+            steps += 99000
+            for i in range(0, 10):
+                self.evolution(100)
+                steps += 100
                 data2average.append(self.adherents_distribution()[1])
                 data2average_desv.append(self.adherents_distribution()[2])
 
             average_new = np.mean(data2average)
             desviation_new = np.mean(data2average_desv)
 
-            distance = abs(average_new - average_aux)
-            distance2 = abs(desviation_new - desviation_aux)
-
-            print distance, distance2
-
-            if distance < epsilon and distance2 < epsilon:
+            m = abs(average_new - average_aux)
+            m2 = abs(desviation_new - desviation_aux)
+            
+            if m < epsilon:# and m2 < epsilon:
                 stationary = 1
-            else:
+            else:        
                 average_aux = average_new
                 desviation_aux = desviation_new
             

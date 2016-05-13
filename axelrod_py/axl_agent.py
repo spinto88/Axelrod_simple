@@ -35,9 +35,9 @@ class Axl_agent(C.Structure):
         """
 	Initialize the agent's state with a random one.
 	"""
-        if initial_state = 'random':
+        if initial_state == 'random':
             self.feat[0] = rand.randint(0, self.q_z-1)
-        elif initial_state = 'equal':
+        elif initial_state == 'equal':
             self.feat[0] = 0
 	    
         for i in range(1, self.f):
