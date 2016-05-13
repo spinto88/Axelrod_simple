@@ -66,6 +66,11 @@ class Axl_network(nx.Graph, C.Structure):
                 self.agent[i].feat[0] = q_z-1
             
             self.node[i] = self.agent[i]
+
+    def set_initial_state_equal(self, feature = 0):
+
+        for i in range(0, self.nagents):
+            self.agent[i].feat[0] = feature
             
     def adherents_counter(self):
         """
