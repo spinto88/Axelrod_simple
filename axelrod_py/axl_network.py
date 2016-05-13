@@ -270,14 +270,12 @@ class Axl_network(nx.Graph, C.Structure):
         """
 
         average_aux = 0
-        desviation_aux = 0
         stationary = 0
         steps = 0
 
         while stationary != 1:
 
             data2average = []
-            data2average_desv = []
             
             self.evolution(99000)
             steps += 99000
@@ -285,23 +283,17 @@ class Axl_network(nx.Graph, C.Structure):
                 self.evolution(100)
                 steps += 100
                 data2average.append(self.adherents_distribution()[1])
-                data2average_desv.append(self.adherents_distribution()[2])
 
             average_new = np.mean(data2average)
-            desviation_new = np.mean(data2average_desv)
 
             m = abs(average_new - average_aux)
-            m2 = abs(desviation_new - desviation_aux)
             
-            if m < epsilon:# and m2 < epsilon:
+            if m < epsilon:
                 stationary = 1
             else:        
                 average_aux = average_new
-                desviation_aux = desviation_new
             
-            average.append(self.adherents_distribution()[1])
-            
-        return steps, average, stationary
+        return steps
     
 
     def image_opinion(self, fname = ''):
