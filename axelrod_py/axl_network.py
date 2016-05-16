@@ -119,11 +119,10 @@ class Axl_network(nx.Graph, C.Structure):
         figure.clf()
 
         plt.hist(range(0, q_z), bins = q_z, weights = adherents, normed = True)
-        plt.axis([-0.5, q_z-0.5, 0, 1.00])
         plt.xlabel('Q value of the first feature')
         plt.ylabel('Normalized histogram')
         if fname == '':
-            plt.show()
+            figure.canvas.draw()
         else:
 	    plt.savefig(fname)
     

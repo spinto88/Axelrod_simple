@@ -43,7 +43,7 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 	
 			random = (((double)rand())/RAND_MAX);	
 			
-			if((mysys->agent[j].zealot>random)&&(mysys->agent[i].feat[0] != mysys->agent[j].feat[0])) /*condition for zealot*/
+			if((mysys->agent[j].zealot > random)&&(mysys->agent[i].feat[0] != mysys->agent[j].feat[0])) /*condition for zealot*/
 			    	r = 0;    
 			else
 			{
@@ -76,7 +76,7 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 					diff_frac = (-1 * diff_frac);
 					random = (((double)rand())/RAND_MAX);
 
-					if((random<b)&&(r==0))
+					if((random < b)&&(r == 0))
 					{
 						/*If the mean field takes action, then agent i wants to be vaccinated, then the first feature must be near to zero. The first feature does not change.*/	
 						Changes[i].x = -1;
@@ -100,7 +100,6 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 		if(r!=-1)
 			mysys->agent[i].feat[r] = Changes[i].value;
 	}
-
 
         free(Changes);
 
