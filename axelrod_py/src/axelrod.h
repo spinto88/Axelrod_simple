@@ -70,6 +70,7 @@ struct _axl_network
         int number_of_metric_feats; /* This is the number of features which are metric. If it's larger than f, it means that all features are metric */
         axl_mass_media mass_media;
         double b;
+        int mode_mf; /*1 active, 0 inactive*/
 };
 typedef struct _axl_network axl_network;
 #endif

@@ -4,7 +4,7 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 {
 	int i, j, f, r;	
         int n = mysys->nagents;
-        int diff_q, diff_frac;
+        int diff_q, diff_frac, mode_mf = mysys->mode_mf;
         double h_ab, random, fraction, b = mysys->b;
 
         /* Struct feature which has the feature to change and the new value */
@@ -79,11 +79,21 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 					if((random < b)&&(r == 0))
 					{
 						/*If the mean field takes action, then agent i wants to be vaccinated, then the first feature must be near to zero. The first feature does not change.*/	
-						Changes[i].x = -1;
-						continue;
+						if(mode_mf == 0)
+						{   
+                                        		Changes[i].x = -1;
+							continue;
+						}
+						else if(mode_mf == 1)
+	 					{
+							Changes[i].value = (rand() % (mysys->agent[i].feat[0] + 1));
+                                                }
+						
 					}	
-
-					Changes[i].value = mysys->agent[j].feat[r] - (rand() % (diff_frac + 1));
+					else
+					{
+						Changes[i].value = mysys->agent[j].feat[r] - (rand() % (diff_frac + 1));
+					}
 				}
 			}
 			/* Else (if it is not metric) take the exact feature of j */
