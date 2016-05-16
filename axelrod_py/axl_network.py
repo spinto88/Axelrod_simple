@@ -23,9 +23,10 @@ class Axl_network(nx.Graph, C.Structure):
                 ('noise', C.c_double),
 		('number_of_metric_feats', C.c_int),
 		('mass_media', Axl_mass_media),
-		('b', C.c_double)]
+		('b', C.c_double),
+                ('mode_mf', C.c_int)]
 
-    def __init__(self, n, f, q, q_z = 100, b = 0.0, A = [], fraction = 1.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
+    def __init__(self, n, f, q, q_z = 100, b = 0.0, mode_mf = 1, A = [], fraction = 1.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
 
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
@@ -45,6 +46,7 @@ class Axl_network(nx.Graph, C.Structure):
         self.noise = noise
 	self.number_of_metric_feats = number_of_metric_feats
 	self.b = b
+        self.mode_mf = mode_mf
 
 
     def topology_init(self, n):
@@ -262,7 +264,7 @@ class Axl_network(nx.Graph, C.Structure):
 
     
 
-    def evol2stationary(self, epsilon = 0.10):
+    def evol2stationary(self, epsilon = 0.0001):
         """
         This function manages the system to a stationary state, where 
         the average value of the adherents and the width of the distribution
@@ -272,18 +274,22 @@ class Axl_network(nx.Graph, C.Structure):
         average_aux = 0
         stationary = 0
         steps = 0
+        data3average = []
 
         while stationary != 1:
 
             data2average = []
             
-            self.evolution(99000)
-            steps += 99000
+            self.evolution(1000)#99000)
+            steps += 1000#99000
             for i in range(0, 10):
-                self.evolution(100)
-                steps += 100
+                self.evolution(10)#100)
+                steps += 10#100
                 data2average.append(self.adherents_distribution()[1])
-
+                
+            for num in data2average:
+                    data3average.append(num)
+                                        
             average_new = np.mean(data2average)
 
             m = abs(average_new - average_aux)
@@ -293,7 +299,7 @@ class Axl_network(nx.Graph, C.Structure):
             else:        
                 average_aux = average_new
             
-        return steps
+        return steps, data3average 
     
 
     def image_opinion(self, fname = ''):
