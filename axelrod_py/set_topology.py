@@ -1,8 +1,10 @@
 import networkx as nx
 import random as rnd
+import ctypes as C
 
-def set_topology(G, id_topology, parameters = {}):
-
+def set_topology(G, id_topology, parameters = {}, opinion_links = 'No'):
+ 
+    # Reset the graph
     for edge in G.edges():
         G.remove_edge(edge[0], edge[1])
 
@@ -103,6 +105,11 @@ def set_topology(G, id_topology, parameters = {}):
 
 	set_topology(G, id_topology = 2.0)
 
+        if opinion_links == 'Yes':
+            for i in range(0, number_of_nodes):
+                G.agent[i].degree_contact = G.degree(i)
+                G.agent[i].contact_links = (C.c_int * G.degree(i))(*G.neighbors(i))
+
         for i in range(0, number_of_nodes):
             x = i % n
             y = i / n
@@ -116,6 +123,15 @@ def set_topology(G, id_topology, parameters = {}):
             G.add_edge(i, neigh7)
             G.add_edge(i, neigh8)
 
+        if opinion_links == 'Yes':
+            for i in range(0, number_of_nodes):
+                G.agent[i].degree_opinion = G.degree(i) - G.agent[i].degree_contact
+                opinion_links_list = G.neighbors(i)
+                for j in range(0, G.agent[i].degree_contact):
+                    opinion_links_list.remove(G.agent[i].contact_links[j])
+                G.agent[i].opinion_links = (C.c_int * G.agent[i].degree_opinion)(*opinion_links_list)
+        
+
     elif id_topology == 3.1:
         """ 
 	Square lattice with rigid walls (finit lattice, without PBC), first, second and third neighbors.
@@ -126,6 +142,11 @@ def set_topology(G, id_topology, parameters = {}):
             G.remove_nodes_from(range(number_of_nodes, G.number_of_nodes()))
 	    
         set_topology(G, id_topology = 2.1)
+
+        if opinion_links == 'Yes':
+            for i in range(0, number_of_nodes):
+                G.agent[i].degree_contact = G.degree(i)
+                G.agent[i].contact_links = (C.c_int * G.degree(i))(*G.neighbors(i))
 
 	for i in range(0, number_of_nodes):
            Neigh5 = i + 2
@@ -141,6 +162,14 @@ def set_topology(G, id_topology, parameters = {}):
 	       G.add_edge(i,Neigh7)
            if((((Neigh8 + 1) % n) != 0 and ((Neigh8 + 2) % n) != 0) and Neigh8 < number_of_nodes):
                G.add_edge(i,Neigh8)
+
+        if opinion_links == 'Yes':
+            for i in range(0, number_of_nodes):
+                G.agent[i].opinion_degree = G.degree(i) - G.agent[i].degree_contact
+                opinion_links_list = G.neighbors(i)
+                for j in range(0, G.agent[i].degree_contact):
+                    opinion_links_list.remove(G.agent[i].contact_links[j])
+                G.agent[i].opinion_links = (C.c_int * G.agent[i].degree_opinion)(*opinion_links_list)
 
     else:
         print "Topology is not set correctly"

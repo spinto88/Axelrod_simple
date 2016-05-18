@@ -19,7 +19,12 @@ class Axl_agent(C.Structure):
                 ('vaccine', C.c_int),
 		('degree', C.c_int),
 		('label', C.c_int),
-		('neighbors', C.POINTER(C.c_int))]
+		('neighbors', C.POINTER(C.c_int)),
+                ('degree_contact', C.c_int),
+                ('contact_links', C.POINTER(C.c_int)),
+                ('degree_opinion', C.c_int),
+		('opinion_links', C.POINTER(C.c_int))]
+
 
     def __init__(self, f, q, q_z, fraction):
         """
@@ -29,7 +34,6 @@ class Axl_agent(C.Structure):
         self.q = q
         self.q_z = q_z   
         self.fraction = fraction
-        self.feat = (C.c_int * f)()
         self.init_agent()
         self.zealot = 0
         self.vaccine = 0
@@ -38,6 +42,7 @@ class Axl_agent(C.Structure):
         """
 	Initialize the agent's state with a random one.
 	"""
+        self.feat = (C.c_int * self.f)()
         self.feat[0] = rand.randint(0, self.q_z-1)
         	    
         for i in range(1, self.f):

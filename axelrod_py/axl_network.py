@@ -34,8 +34,7 @@ class Axl_network(nx.Graph, C.Structure):
         nx.empty_graph(n, self)
 
         # Init agents' states
-        self.nagents = n
-        self.init_agents(f, q, q_z, A, fraction)
+        self.init_agents(n, f, q, q_z, A, fraction)
 
         # Set noise rate or number of metric features
         self.noise = noise
@@ -51,13 +50,13 @@ class Axl_network(nx.Graph, C.Structure):
             self.set_topology(id_topology, net_parameters)
 
    
-    def set_topology(self, id_topology, parameters = {}):
+    def set_topology(self, id_topology, parameters = {}, opinion_links = 'No'):
         """
         Set the network's topology
         """
         self.id_topology = id_topology
 
-        setop.set_topology(self, id_topology, parameters)
+        setop.set_topology(self, id_topology, parameters, opinion_links)
 
         self.nagents = self.number_of_nodes()
 
@@ -66,10 +65,11 @@ class Axl_network(nx.Graph, C.Structure):
             self.agent[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
             self.node[i] = self.agent[i]
 
-    def init_agents(self, f, q, q_z, A, fraction):
+    def init_agents(self, n, f, q, q_z, A, fraction):
         """
         Iniatialize the agents' state.
         """
+        self.nagents = n
         self.agent = (Axl_agent * self.nagents)()
     
         for i in range(0, self.nagents):
@@ -174,6 +174,59 @@ class Axl_network(nx.Graph, C.Structure):
         libc.evol_fast.argtypes = [C.POINTER(Axl_network), C.c_int, C.c_int]
 
         libc.evol_fast(C.byref(self), steps, rand.randint(0, 10000))
+
+
+    def rewiring(self):
+
+        class Top_changes(C.Structure):
+            _fields_ = [('remove', C.c_int),
+			('add', C.c_int)]
+
+	changes = (Top_changes * self.nagents)()
+        edges2rm = []
+        edges2add = []
+
+        libc.rewiring.argtypes = [Axl_network, C.POINTER(Top_changes)]
+
+	libc.rewiring(self, changes)
+
+        for i in range(0, self.nagents):
+            if changes[i].remove != -1:
+                edges2rm.append((i, changes[i].remove))
+            if changes[i].add != -1:
+                edges2add.append((i, changes[i].add))   
+
+        # This 'for' is made in order to keep the number of edges constant
+        for i in range(0, len(edges2rm)):    
+            if edges2add[i][0] < edges2add[i][1]:    
+                if (edges2add[i][0], edges2add[i][1]) in self.edges():
+                    pass
+                else:
+                    try:
+                        self.remove_edge(edges2rm[i][0], edges2rm[i][1])
+                        self.add_edge(edges2add[i][0], edges2add[i][1])
+                    except:
+                        pass
+            else:
+                if (edges2add[i][1], edges2add[i][0]) in self.edges():
+                    pass
+                else:
+                    try:
+                        self.remove_edge(edges2rm[i][0], edges2rm[i][1])
+                        self.add_edge(edges2add[i][0], edges2add[i][1])
+                    except:
+                        pass
+
+        # Update the list of neighbors
+        for i in range(0, self.nagents):
+            self.agent[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
+            self.agent[i].degree = self.degree(i)
+            self.agent[i].degree_opinion = self.degree(i) - self.agent[i].degree_contact
+            opinion_links = self.neighbors(i)
+            for j in range(0, self.agent[i].degree_contact):
+                opinion_links.remove(self.agent[i].contact_links[j])
+            self.agent[i].opinion_links = (C.c_int * self.agent[i].degree_opinion)(*opinion_links)
+            
 
 
     def fragment_identifier(self, clustering_radio = 0):
