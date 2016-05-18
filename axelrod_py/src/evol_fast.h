@@ -9,6 +9,6 @@
 #include "noise.h"
 #include "adaptation.h"
 
-void evol_fast(axl_network *, axl_node *, int, int);
+void evol_fast(axl_network *, int, int);
 
 #endif

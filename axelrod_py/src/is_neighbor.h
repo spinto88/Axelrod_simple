@@ -4,6 +4,6 @@
 
 #include "axelrod.h"
 
-int is_neighbor(axl_node, int);
+int is_neighbor(axl_agent, int);
 
 #endif

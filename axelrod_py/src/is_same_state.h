@@ -6,6 +6,6 @@
 #include "axelrod.h"
 #include "homophily.h"
 
-int is_same_state(axl_network, int, int, int);
+int is_same_state(axl_agent, axl_agent, int);
 
 #endif

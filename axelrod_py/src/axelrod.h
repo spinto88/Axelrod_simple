@@ -18,25 +18,11 @@ struct _axl_agent
 	int *feat; /*!< Cutural vector with f components.*/
 	double zealot;
 	int vaccine;
+	int degree; /* Degree of the node */
+	int label; /* Label useful for the fragment identifier */
+	int *neighbors; /* List of neighbors */
 };
 typedef struct _axl_agent axl_agent; /*!< struct _axl_agent redefined as axl_agent. */
-#endif
-
-
-#ifndef AXL_NODE
-#define AXL_NODE
-/**
-Axelrod node: it has information
-about the degree of the node 
-and the list of neighbors
-*/
-struct _axl_node
-{
-	int degree;
-        int label;
-	int *neighbors;
-};
-typedef struct _axl_node axl_node;
 #endif
 
 #ifndef AXL_MASS_MEDIA

@@ -4,7 +4,6 @@ import networkx as nx
 import random as rand
 import numpy as np
 import set_topology as setop
-from axl_node import *
 from axl_agent import *
 from axl_mass_media import *
 
@@ -17,7 +16,6 @@ class Axl_network(nx.Graph, C.Structure):
     """
     Axelrod network: it has nagents axelrod agents, and an amount of noise in the dynamics of the system. This class inherites from the networkx.Graph the way to be described.
     """
-
     _fields_ = [('nagents', C.c_int),
                 ('agent', C.POINTER(Axl_agent)),
                 ('noise', C.c_double),
@@ -26,48 +24,59 @@ class Axl_network(nx.Graph, C.Structure):
 		('b', C.c_double),
                 ('mode_mf', C.c_int)]
 
-    def __init__(self, n, f, q, q_z = 100, b = 0.0, mode_mf = 1, A = [], fraction = 1.0, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
+    def __init__(self, n, f, q, q_z = 100, fraction = 1.0, number_of_metric_feats = 0, id_topology = 'Nan', net_parameters = {}, b = 0.0, mode_mf = 1, A = [], noise = 0.00):
 
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
 	"""
+        # Init graph properties
         nx.Graph.__init__(self)
+        nx.empty_graph(n, self)
 
-        self.id_topology = id_topology
-        self.topology_init(n)
-
-        self.nagents = self.number_of_nodes()
-        
-        self.agent = (Axl_agent * self.nagents)()
+        # Init agents' states
         self.init_agents(f, q, q_z, A, fraction)
 
-        self.mass_media = Axl_mass_media(f, q)
-
+        # Set noise rate or number of metric features
         self.noise = noise
 	self.number_of_metric_feats = number_of_metric_feats
+ 
+        # Init mass media or external scalar field
+        self.mass_media = Axl_mass_media(f, q)
 	self.b = b
         self.mode_mf = mode_mf
 
+        # Init topology
+        if id_topology != 'Nan':
+            self.set_topology(id_topology, net_parameters)
 
-    def topology_init(self, n):
+   
+    def set_topology(self, id_topology, parameters = {}):
         """
-        Initialize the network's topology
+        Set the network's topology
         """
-        setop.set_topology(self, n, self.id_topology)
+        self.id_topology = id_topology
 
+        setop.set_topology(self, id_topology, parameters)
+
+        self.nagents = self.number_of_nodes()
+
+        for i in range(0, self.number_of_nodes()):
+            self.agent[i].degree = self.degree(i)
+            self.agent[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
+            self.node[i] = self.agent[i]
 
     def init_agents(self, f, q, q_z, A, fraction):
         """
         Iniatialize the agents' state.
         """
+        self.agent = (Axl_agent * self.nagents)()
     
         for i in range(0, self.nagents):
             self.agent[i] = Axl_agent(f, q, q_z, fraction)
             if i in A:
                 self.agent[i].zealot = 1
                 self.agent[i].feat[0] = q_z-1
-            
-            self.node[i] = self.agent[i]
+
 
     def set_initial_state_equal(self, feature = 0):
 
@@ -97,12 +106,11 @@ class Axl_network(nx.Graph, C.Structure):
         libc.adherents_counter.restype = C.c_int
         
         q_z = self.agent[0].q_z
-        adherents = np.zeros(q_z)
-        
-        for q in range(0, q_z):
-            adherents_q = libc.adherents_counter(self, q)
-            adherents[q] = float(adherents_q)/self.nagents
 
+        adherents = np.zeros(q_z)        
+        for q in range(0, q_z):
+            adherents[q] += float(libc.adherents_counter(self, q)) / self.nagents
+        
         average = np.average(range(0, q_z), weights = adherents)
         desviation = 0
         for q in range(0, q_z):
@@ -162,16 +170,9 @@ class Axl_network(nx.Graph, C.Structure):
 	Make steps synchronius evolutions of the system
         """
 
-        n = self.nagents
+        libc.evol_fast.argtypes = [C.POINTER(Axl_network), C.c_int, C.c_int]
 
-        nodes_info = (Axl_node * n)()
-        for i in range(0, n):
-            nodes_info[i].degree = self.degree(i)
-            nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
-
-        libc.evol_fast.argtypes = [C.POINTER(Axl_network), C.POINTER(Axl_node), C.c_int, C.c_int]
-
-        libc.evol_fast(C.byref(self), nodes_info, steps, rand.randint(0, 10000))
+        libc.evol_fast(C.byref(self), steps, rand.randint(0, 10000))
 
 
     def fragment_identifier(self, clustering_radio = 0):
@@ -183,23 +184,16 @@ class Axl_network(nx.Graph, C.Structure):
         """
        
         n = self.nagents
-        libc.fragment_identifier.argtypes = [Axl_network, C.POINTER(Axl_node), C.c_int]
-      
-        nodes_info = (Axl_node * n)()
-
-        # Neighbors list built
-        for i in range(0, n):
-            nodes_info[i].degree = self.degree(i)
-            nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
+        libc.fragment_identifier.argtypes = [C.POINTER(Axl_network), C.c_int]      
 
 	# This function puts in nodes_info[i].label the label of the node i, according to 
 	# the current criteria of identifing 
-        libc.fragment_identifier(self, nodes_info, clustering_radio)
+        libc.fragment_identifier(C.byref(self), clustering_radio)
 
         # After this, the vector labels has the label of each agent
         labels = np.zeros(n)
         for i in range(0, n):
-            labels[nodes_info[i].label] += 1
+            labels[self.agent[i].label] += 1
         
         # Size_max is the size of the biggest fragment
         size_max = labels.max()
@@ -230,19 +224,11 @@ class Axl_network(nx.Graph, C.Structure):
         """
 	Active links: it returns True if there are active links in the system.
         """
-
-	n = self.nagents
 	
-	libc.active_links.argtypes = [Axl_network, C.POINTER(Axl_node)]
+	libc.active_links.argtypes = [Axl_network]
 	libc.active_links.restype = C.c_int
 
-        nodes_info = (Axl_node * n)()
-
-	for i in range(0, n):
-		nodes_info[i].degree = self.degree(i)
-		nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
-
-	return libc.active_links(self, nodes_info)
+	return libc.active_links(self)
 
 
     def evol2convergence(self, check_steps = 100):

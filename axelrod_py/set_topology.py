@@ -1,15 +1,19 @@
 import networkx as nx
 import random as rnd
 
-def set_topology(G, N, id_topology):
+def set_topology(G, id_topology, parameters = {}):
+
+    for edge in G.edges():
+        G.remove_edge(edge[0], edge[1])
 
     if id_topology == 1.0:
         """ 
         Square lattice with periodic bounded conditions. The number of N nodes is aproximated by the nearest perfect square.
         """
-        number_of_nodes = N
-        n = int(number_of_nodes ** 0.5)
-        number_of_nodes = n*n
+        n = int(G.number_of_nodes() ** 0.5)
+        number_of_nodes = n * n
+        if number_of_nodes != G.number_of_nodes():
+            G.remove_nodes_from(range(number_of_nodes, G.number_of_nodes()))
 
         for i in range(0, number_of_nodes):
             x = i % n
@@ -19,13 +23,15 @@ def set_topology(G, N, id_topology):
             G.add_edge(i, neigh1)
             G.add_edge(i, neigh2)
     
+
     elif id_topology == 1.1:
         """ 
 	Square lattice with rigid walls (finit lattice, without PBC).
 	"""
-        number_of_nodes = N
-        n = int(number_of_nodes ** 0.5)
+        n = int(G.number_of_nodes() ** 0.5)
         number_of_nodes = n * n
+        if number_of_nodes != G.number_of_nodes():
+            G.remove_nodes_from(range(number_of_nodes, G.number_of_nodes()))
 	    
 	for i in range(0, number_of_nodes):
            Neigh1 = i + n
@@ -40,22 +46,23 @@ def set_topology(G, N, id_topology):
         """ 
 	Complete graph.
 	"""
-        number_of_nodes = N
-        nx.complete_graph(N, G)
+        number_of_nodes = G.number_of_nodes()
+        nx.complete_graph(number_of_nodes, G)
+
         
     elif id_topology == 2.0:
 	"""
 	Square lattice with periodic bounded conditions, first and second neighbors
 	"""
-	
-        number_of_nodes = N
-        n = int(number_of_nodes ** 0.5)
-        number_of_nodes = n*n
+        n = int(G.number_of_nodes() ** 0.5)
+        number_of_nodes = n * n
+        if number_of_nodes != G.number_of_nodes():
+            G.remove_nodes_from(range(number_of_nodes, G.number_of_nodes()))
 
         for i in range(0, number_of_nodes):
             x = i % n
             y = i / n
-            set_topology(G,N,1.0)		
+            set_topology(G, id_topology = 1.0)		
             neigh3 = (x + 1) % n + ((y + 1) % n) * n
  	    neigh4 = (x - 1 + n) % n + ((y + 1 + n) % n) * n		
             G.add_edge(i, neigh3)
@@ -66,12 +73,13 @@ def set_topology(G, N, id_topology):
         """ 
 	Square lattice with rigid walls (finit lattice, without PBC), first and second neighbors.
 	"""
-        number_of_nodes = N
-        n = int(number_of_nodes ** 0.5)
+        n = int(G.number_of_nodes() ** 0.5)
         number_of_nodes = n * n
+        if number_of_nodes != G.number_of_nodes():
+            G.remove_nodes_from(range(number_of_nodes, G.number_of_nodes()))
 	    
 	for i in range(0, number_of_nodes):
-           set_topology(G,N,1.1)
+           set_topology(G, id_topology = 1.1)
            Neigh3 = i + 1 + n
 	   Neigh4 = i - 1 + n		
            if(Neigh3 < number_of_nodes and (Neigh3 % n) != 0):
@@ -85,14 +93,15 @@ def set_topology(G, N, id_topology):
 	Square lattice with periodic bounded conditions, first, second and third neighbors
 	"""
 	
-        number_of_nodes = N
-        n = int(number_of_nodes ** 0.5)
-        number_of_nodes = n*n
+        n = int(G.number_of_nodes() ** 0.5)
+        number_of_nodes = n * n
+        if number_of_nodes != G.number_of_nodes():
+            G.remove_nodes_from(range(number_of_nodes, G.number_of_nodes()))
 
         for i in range(0, number_of_nodes):
             x = i % n
             y = i / n
-	    set_topology(G,N,2.0)
+	    set_topology(G, id_topology = 2.0)
             neigh5 = (x + 2) % n + y * n
 	    neigh6 = x + ((y + 2) % n) * n
             neigh7 = (x + 2) % n + ((y + 2) % n) * n
@@ -108,12 +117,13 @@ def set_topology(G, N, id_topology):
         """ 
 	Square lattice with rigid walls (finit lattice, without PBC), first, second and third neighbors.
 	"""
-        number_of_nodes = N
-        n = int(number_of_nodes ** 0.5)
+        n = int(G.number_of_nodes() ** 0.5)
         number_of_nodes = n * n
+        if number_of_nodes != G.number_of_nodes():
+            G.remove_nodes_from(range(number_of_nodes, G.number_of_nodes()))
 	    
 	for i in range(0, number_of_nodes):
-           set_topology(G,N,2.1)
+           set_topology(G, id_topology = 2.1)
            Neigh5 = i + 2
 	   Neigh6 = i + 2 + 2 * n
            Neigh7 = i + 2 * n
@@ -127,3 +137,6 @@ def set_topology(G, N, id_topology):
 	       G.add_edge(i,Neigh7)
            if((((Neigh8 + 1) % n) != 0 and ((Neigh8 + 2) % n) != 0) and Neigh8 < number_of_nodes):
                G.add_edge(i,Neigh8)
+
+    else:
+        print "Topology is not set correctly"

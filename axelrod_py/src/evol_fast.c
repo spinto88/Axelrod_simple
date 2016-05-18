@@ -1,7 +1,7 @@
 
 #include "evol_fast.h"
 
-void evol_fast(axl_network *mysys, axl_node *nodes_info, int steps, int seed)
+void evol_fast(axl_network *mysys, int steps, int seed)
 {
 	int i, j, step;
 	int n = mysys->nagents;
@@ -18,8 +18,8 @@ void evol_fast(axl_network *mysys, axl_node *nodes_info, int steps, int seed)
 		/* Select a lattice neighbors */
 	        for(i = 0; i < n; i++)
 		{
-			j = rand() % nodes_info[i].degree;
-	                neighbors[i] = nodes_info[i].neighbors[j];
+			j = rand() % mysys->agent[i].degree;
+	                neighbors[i] = mysys->agent[i].neighbors[j];
 
 		}
 

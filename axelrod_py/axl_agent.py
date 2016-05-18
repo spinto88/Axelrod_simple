@@ -15,8 +15,11 @@ class Axl_agent(C.Structure):
                 ('q_z', C.c_int),
 		('fraction', C.c_double),
                 ('feat', C.POINTER(C.c_int)),
-        ('zealot', C.c_double),
-        ('vaccine', C.c_int)]
+                ('zealot', C.c_double),
+                ('vaccine', C.c_int),
+		('degree', C.c_int),
+		('label', C.c_int),
+		('neighbors', C.POINTER(C.c_int))]
 
     def __init__(self, f, q, q_z, fraction):
         """

@@ -1,16 +1,16 @@
 
 #include "is_neighbor.h"
 
-int is_neighbor(axl_node node1, int ind_node2)
+int is_neighbor(axl_agent agent1, int ind_agent2)
 {
 /**
-It sees if the index of node 2 is in the list of neighbors of node 1
+It sees if the index of the agent 2 is in the list of neighbors of agent 1.
 */
 	int i;
 
-	for(i = 0; i < node1.degree; i++)
+	for(i = 0; i < agent1.degree; i++)
 	{
-		if(ind_node2 == node1.neighbors[i])
+		if(ind_agent2 == agent1.neighbors[i])
 			return 1;
 	}
 	return 0;
