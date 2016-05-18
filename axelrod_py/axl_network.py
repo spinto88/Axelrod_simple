@@ -34,6 +34,7 @@ class Axl_network(nx.Graph, C.Structure):
         nx.empty_graph(n, self)
 
         # Init agents' states
+        self.nagents = n
         self.init_agents(f, q, q_z, A, fraction)
 
         # Set noise rate or number of metric features

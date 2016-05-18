@@ -18,4 +18,4 @@ libc.so: $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rfv $(SRCDIR)/*.o *.so *.pyc
+	rm -rfv $(SRCDIR)/*.o *.so *.pyc $(SRCDIR)/*~ *~
