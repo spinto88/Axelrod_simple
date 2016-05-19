@@ -82,7 +82,8 @@ class Axl_network(nx.Graph, C.Structure):
     def set_initial_state_equal(self, feature = 0):
 
         for i in range(0, self.nagents):
-            self.agent[i].feat[0] = feature
+            if self.agent[i].zealot == 0:
+                self.agent[i].feat[0] = feature
             
     def adherents_counter(self):
         """
@@ -126,6 +127,7 @@ class Axl_network(nx.Graph, C.Structure):
 
         import matplotlib.pyplot as plt
 
+        plt.ion()
         figure = plt.figure(1)
         figure.clf()
 
@@ -185,6 +187,7 @@ class Axl_network(nx.Graph, C.Structure):
 	changes = (Top_changes * self.nagents)()
         edges2rm = []
         edges2add = []
+        nodes_changed = []
 
         libc.rewiring.argtypes = [Axl_network, C.POINTER(Top_changes)]
 
@@ -192,39 +195,29 @@ class Axl_network(nx.Graph, C.Structure):
 
         for i in range(0, self.nagents):
             if changes[i].remove != -1:
-                edges2rm.append((i, changes[i].remove))
-            if changes[i].add != -1:
-                edges2add.append((i, changes[i].add))   
+                edges2rm.append([i, changes[i].remove])
+                edges2add.append([i, changes[i].add])  
 
         # This 'for' is made in order to keep the number of edges constant
         for i in range(0, len(edges2rm)):    
-            if edges2add[i][0] < edges2add[i][1]:    
-                if (edges2add[i][0], edges2add[i][1]) in self.edges():
-                    pass
-                else:
-                    try:
-                        self.remove_edge(edges2rm[i][0], edges2rm[i][1])
-                        self.add_edge(edges2add[i][0], edges2add[i][1])
-                    except:
-                        pass
+            edges2rm[i].sort()
+            edges2add[i].sort()
+            if (edges2add[i][0], edges2add[i][1]) in self.edges():
+                pass
             else:
-                if (edges2add[i][1], edges2add[i][0]) in self.edges():
+                try:
+                    self.remove_edge(edges2rm[i][0], edges2rm[i][1])
+                    self.add_edge(edges2add[i][0], edges2add[i][1])
+                except:
                     pass
-                else:
-                    try:
-                        self.remove_edge(edges2rm[i][0], edges2rm[i][1])
-                        self.add_edge(edges2add[i][0], edges2add[i][1])
-                    except:
-                        pass
 
         # Update the list of neighbors
         for i in range(0, self.nagents):
             self.agent[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
             self.agent[i].degree = self.degree(i)
             self.agent[i].degree_opinion = self.degree(i) - self.agent[i].degree_contact
-            opinion_links = self.neighbors(i)
-            for j in range(0, self.agent[i].degree_contact):
-                opinion_links.remove(self.agent[i].contact_links[j])
+            opinion_links = set(self.neighbors(i)) - set(self.agent[i].contact_links[:self.agent[i].degree_contact])
+
             self.agent[i].opinion_links = (C.c_int * self.agent[i].degree_opinion)(*opinion_links)
             
 
