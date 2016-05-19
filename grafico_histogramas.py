@@ -3,8 +3,8 @@ from axelrod_py import *
 N = 1024
 F = 10
 Q = 20
-b = 0.05
-Z = 20
+b = 0
+Z = 10
 
 # Red cuadrada sin CPC
 id_topology = 1.1

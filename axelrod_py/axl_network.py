@@ -222,7 +222,7 @@ class Axl_network(nx.Graph, C.Structure):
             
 
 
-    def fragment_identifier(self, clustering_radio = 0):
+    def fragment_identifier(self, clustering_radio = 0, type_search = 0):
         """
  	Fragment identifier: it returns the size of the biggest fragment, its state, 
 	and the cluster distribution.
@@ -231,11 +231,11 @@ class Axl_network(nx.Graph, C.Structure):
         """
        
         n = self.nagents
-        libc.fragment_identifier.argtypes = [C.POINTER(Axl_network), C.c_int]      
+        libc.fragment_identifier.argtypes = [C.POINTER(Axl_network), C.c_int, C.c_int]      
 
 	# This function puts in nodes_info[i].label the label of the node i, according to 
 	# the current criteria of identifing 
-        libc.fragment_identifier(C.byref(self), clustering_radio)
+        libc.fragment_identifier(C.byref(self), clustering_radio, type_search)
 
         # After this, the vector labels has the label of each agent
         labels = np.zeros(n)
@@ -249,21 +249,40 @@ class Axl_network(nx.Graph, C.Structure):
 
         # feat0_distribution returns a dictionary with all clusters in the system, 
 	# its first feature and size
-        feat0_distribution = []
-        feat0_distribution_size = []
-        for i in range(0, len(labels)):
-            if labels[i] != 0:
-                feat0_distribution.append({'First feature': self.agent[i].feat[0], 'Size': labels[i]})
-                feat0_distribution_size.append(labels[i])
-
-        if clustering_radio == 0:
+        if(type_search == 0):
+            feat0_distribution = []
+            feat0_distribution_size = []
+            for i in range(0, len(labels)):
+                if labels[i] != 0:
+                    feat0_distribution.append({'First feature': self.agent[i].feat[0], 'Size': labels[i]})
+                    feat0_distribution_size.append(labels[i])
+        else:
+            vaccine_distribution = []
+            vaccine_distribution_size = []
+            for i in range(0, len(labels)):
+                if labels[i] != 0:
+                    vaccine_distribution.append([self.agent[i].vaccine,labels[i]])
+                    vaccine_distribution_size.append(labels[i])
+        
+        if (clustering_radio == 0 and type_search == 0):
             # feat is the first feature of the biggest fragment
             feat = self.agent[index_max].feat[0]
-            return size_max#, feat, feat0_distribution
+            return size_max, feat, feat0_distribution
+        elif (type_search != 0):
+        
+            no_vaccine_data = []
 
+            for item in vaccine_distribution:
+                if(item[0] == 0):
+                    no_vaccine_data.append(item[1])
+                    
+            if(no_vaccine_data == []):
+                no_vaccine_data.append(0)
+                
+            return vaccine_distribution, np.max(no_vaccine_data)
 	else:
             # Size of the biggest fragment and size distribution
-	    return size_max#, feat0_distribution_size
+	    return size_max, feat0_distribution_size
         
 
     def active_links(self):
@@ -296,7 +315,7 @@ class Axl_network(nx.Graph, C.Structure):
 
     
 
-    def evol2stationary(self, epsilon = 0.0001):
+    def evol2stationary(self, epsilon = 0.01):
         """
         This function manages the system to a stationary state, where 
         the average value of the adherents and the width of the distribution
@@ -340,7 +359,7 @@ class Axl_network(nx.Graph, C.Structure):
         It is not confident if q is larger than 63.
         If fname is different of the null string, the matrix is save in a file with that name. This one can be loaded by numpy.loadtxt(fname).
         """
-        if self.id_topology < 1.0:
+        if self.id_topology < 3.2:
 
             import matplotlib.pyplot as plt
 
@@ -376,7 +395,7 @@ class Axl_network(nx.Graph, C.Structure):
         It is not confident if q is larger than 63.
         If fname is different of the null string, the matrix is save in a file with that name. This one can be loaded by numpy.loadtxt(fname).
         """
-        if self.id_topology < 1.0:
+        if self.id_topology < 3.2:
 
             import matplotlib.pyplot as plt
             from matplotlib import colors

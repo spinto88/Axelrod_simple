@@ -1,4 +1,3 @@
-
 #ifndef IS_SAME_STATE_H
 #define IS_SAME_STATE_H
 
@@ -6,6 +5,6 @@
 #include "axelrod.h"
 #include "homophily.h"
 
-int is_same_state(axl_agent, axl_agent, int);
+int is_same_state(axl_agent, axl_agent, int, int);
 
 #endif
