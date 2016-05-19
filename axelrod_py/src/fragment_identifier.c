@@ -1,7 +1,7 @@
 
 #include "fragment_identifier.h"
 
-void fragment_identifier(axl_network mysys, axl_node *node_info, int clustering_radio)
+void fragment_identifier(axl_network mysys, axl_node *node_info, int clustering_radio, int type_serch)
 {
 
 	/* =================================================
@@ -46,7 +46,7 @@ void fragment_identifier(axl_network mysys, axl_node *node_info, int clustering_
 			// Node 2 is the node which we compare with node 1
   			node2 = ordering[k];
 
-			if(((is_neighbor(node_info[node1], node2)) == 1) && (is_same_state(mysys, node1, node2, clustering_radio) == 1))
+			if(((is_neighbor(node_info[node1], node2)) == 1) && (is_same_state(mysys, node1, node2, clustering_radio,type_serch) == 1))
 			// It means: if node2 is a neighbor of node1 and they have the same state, so... 			
 			{					
                                                 // Label of node 2 becomes the same as the node 1's label

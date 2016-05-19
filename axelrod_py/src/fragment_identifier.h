@@ -8,6 +8,6 @@
 #include "is_same_state.h"
 #include "is_neighbor.h"
 
-void fragment_identifier(axl_network, axl_node *, int);
+void fragment_identifier(axl_network, axl_node *, int, int);
 
 #endif
