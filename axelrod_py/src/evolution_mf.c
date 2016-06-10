@@ -5,8 +5,9 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 {
 	int i, j, f, r, ff, k, sum;	
         int n = mysys->nagents;
-        int diff_q, diff_frac, mode_mf = mysys->mode_mf;
-        double h_ab, random, fraction, b = mysys->b, phi = mysys->phi;
+        int diff_q;
+        double h_ab, random;
+	double phi = mysys->phi;
 
         /* Struct feature which has the feature to change and the new value */
 	struct Feature
@@ -28,104 +29,115 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 	for(i=0;i<n;i++)
 	{ 
    		random = (((double)rand())/RAND_MAX);
-		if(random < phi && mysys->agent[i].zealot != 1)
+
+		if((random < phi) && (mysys->agent[i].zealot != 1) && (mysys->evol_opinion == 1))
 		{
-			r = 0;
-			Changes[i].x = r;	
-			
-                        if(r <  mysys->number_of_metric_feats)
-			{
-				diff_frac= (int)(mysys->agent[i].feat[r] * fraction);
-				Changes[i].value = (rand() % (diff_frac + 1));
-				
-				//Changes[i].value = mysys->agent[i].feat[r] - 1;
-				//if(Changes[i].value < 0)
-				//    Changes[i].value = 0;
-			}
-			/* Else (if it is not metric) take the exact feature of mean field.*/
-			else     		        
-				Changes[i].value = 0;
+			Changes[i].x = f;
+			Changes[i].value = rand() % (mysys->agent[i].opinion + 1);
 		}
+
 		else
 		{
 			/* Normal interaction with neighbors*/
        			j = neighbors[i];
 
-            f = mysys->agent[i].f;
-		    ff = mysys->agent[i].ff;
+		        f = mysys->agent[i].f;
+			ff = mysys->agent[i].ff;
 
 			/* Homophily between agent i and j */
 			h_ab = homophily(mysys->agent[i], mysys->agent[j]);
 					    
     			random = (((double)rand())/RAND_MAX);
 
-                sum = 0;
-
-		        for(k=0;k<(f-ff);k++)
+			/* Checks that the variable features are not all equal, like a reduced homophily*/
+	                sum = 0;
+		        for(k = 0; k < (f-ff); k++)
 		        {
 			        if(mysys->agent[i].feat[k] == mysys->agent[j].feat[k])
 				        sum++;
 		        }
 	   		   	
 			/* If the interaction takes place */
-	    		if((random < h_ab)&&(h_ab != 1.00)&&(sum != (f-ff)))
+	    		if((random < h_ab) && (h_ab != 1.00) && (sum != (f-ff)) && (mysys->agent[i].opinion != mysys->agent[j].opinion))
 			{
 				/* Take a random feature where the agents have a different value */
 
-                f = f - ff; //This is to fix some features, if ff = 0 no change is made
-                
-				fraction = mysys->agent[i].fraction;
+				f = f - ff; // This is to fix some features, if ff = 0 no change is made
 	
-				random = (((double)rand())/RAND_MAX);	
-			
-				if((mysys->agent[j].zealot == 1)&&(mysys->agent[i].feat[0] != mysys->agent[j].feat[0])) /*condition for zealot*/
-			    		r = 0;
-			   	else
+				if(mysys->evol_opinion == 1)
 				{
-		    			r = rand() % f;
-					while(mysys->agent[i].feat[r] == mysys->agent[j].feat[r])
-				    		r = (r+1)%f;
-				}			
-      	    			        	
-        			if((mysys->agent[i].zealot != 0)&&(r==0))
-				{
-        	    			/*If the agent i is a zealot, it does not change the first feature*/
-					continue;    
-        	    	    	}	
-       	    			Changes[i].x = r;
-				/* Here we looks if f in one of metric features */
-                        	if(r <  mysys->number_of_metric_feats)
-				{
-				    //Changes[i].value = mysys->agent[i].feat[r] + (mysys->agent[j].feat[r] - mysys->agent[i].feat[r])/abs(mysys->agent[j].feat[r] - mysys->agent[i].feat[r]);
-					/* Differences between Q values */
-					diff_q = mysys->agent[i].feat[r] - mysys->agent[j].feat[r];
-					diff_frac= (int)(diff_q * fraction);
+					/* Condition for zealot: the zealot looks for changing the opinion of the other agent */ 
+					if((mysys->agent[j].zealot == 1) && (mysys->agent[i].opinion != mysys->agent[j].opinion))
+			    			r = f;
 
-					/* The new value is the actual value plus (less) a random value inside the difference */
-					if(diff_q > 0)
-						Changes[i].value = mysys->agent[j].feat[r] + (rand() % (diff_frac + 1));
-					else
-					{	
-						/* Put the difference greater than zero */
-						diff_frac = (-1 * diff_frac);
-						random = (((double)rand())/RAND_MAX);
-						Changes[i].value = mysys->agent[j].feat[r] - (rand() % (diff_frac + 1));
+			   		else
+					{
+						if(sum == (f-ff))
+							r = f;
+						else
+						{
+				    			r = rand() % (ff + 1);
+							if(r == ff)
+							{
+								if(mysys->agent[i].opinion == mysys->agent[j].opinion)
+								{
+									r = (r + 1) % (ff + 1);
+									while(mysys->agent[i].feat[r] == mysys->agent[j].feat[r])
+								    		r = (r + 1) % ff;
+								}
+								else
+									r = f;
+							}
+						}			
 					}
+      	    			        
+					Changes[i].x = r;	
+        		    		/* If the agent i is a zealot, it does not change the opinion */
+        				if((mysys->agent[i].zealot != 0) && (r == f))
+		       	    			Changes[i].x = -1;					
+
+					/* Here we looks if f in one of metric features */
+        	                	if(r == f)
+					{
+						/* Differences between opinino values */
+						diff_q = mysys->agent[i].opinion - mysys->agent[j].opinion;
+
+						/* The new value is the actual value plus (less) a random value inside the difference */
+						if(diff_q > 0)
+							Changes[i].value = mysys->agent[j].feat[r] + (rand() % (diff_q + 1));
+						else
+							Changes[i].value = mysys->agent[j].feat[r] - (rand() % (abs(diff_q) + 1));
+					}				
+
+					/* Else (if it is not metric) take the exact feature of j */
+					else     		        
+						Changes[i].value = mysys->agent[j].feat[r];
 				}
-				/* Else (if it is not metric) take the exact feature of j */
-				else     		        
-					//Changes[i].value = mysys->agent[i].feat[r] + (mysys->agent[j].feat[r] - mysys->agent[i].feat[r])/abs(mysys->agent[j].feat[r] - mysys->agent[i].feat[r]);
+				else
+				{
+					r = rand() % f;
+					if(mysys->agent[i].feat[r] == mysys->agent[j].feat[r])
+						r = (r + 1) % f;
+
+					Changes[i].x = r;
 					Changes[i].value = mysys->agent[j].feat[r];
+				}
 			}
-		
 		}
+
 	}
+
 	/* Updating of the network in a synchronic way */
 	for(i=0;i<n;i++)
 	{
 		r = Changes[i].x;
 		if(r!=-1)
-			mysys->agent[i].feat[r] = Changes[i].value;
+		{
+			if(r == f)
+				mysys->agent[i].opinion = Changes[i].value;
+			else
+				mysys->agent[i].feat[r] = Changes[i].value;
+		}
 	}
 
         free(Changes);

@@ -22,7 +22,8 @@ class Axl_network(nx.Graph, C.Structure):
 		('mass_media', Axl_mass_media),
 		('b', C.c_double),
                 ('mode_mf', C.c_int),
-		('phi', C.c_double)]
+		('phi', C.c_double),
+		('evol_opinion', C.c_int)]
 
     def __init__(self, n, f, q, q_z = 100, ff = 0, id_topology = 'Nan', net_parameters = {}, b = 0.00, mode_mf = 0, phi = 0.0, A = [], noise = 0.00):
         """
@@ -98,7 +99,7 @@ class Axl_network(nx.Graph, C.Structure):
         for i in range(0, self.nagents):
             self.agent[i] = Axl_agent(f, q, q_z, ff)
                         
-        for j in A::
+        for j in A:
             self.agent[j].zealot = 1
             self.agent[j].opinion = q_z
 
@@ -111,7 +112,12 @@ class Axl_network(nx.Graph, C.Structure):
         for i in range(0, self.nagents):
             if self.agent[i].zealot == 0:
                 self.agent[i].feat[0] = feature
-            
+
+    def set_number_of_fixed_features(self, ff):
+    
+        for i in range(0, self.nagents):
+            self.agent[i].ff = ff
+
     def adherents_counter(self):
         """
         Gives number of agents with the same q for the first feature, only for the q_z given

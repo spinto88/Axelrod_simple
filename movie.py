@@ -11,11 +11,11 @@ A = zealots_list(N,Z)
 
 mysys = Axl_network(n = N, f = F, q = Q, q_z = Qz, A = A, number_of_metric_feats = 1, id_topology = 2.1)
 
-mysys.phi = 0.0000
+mysys.phi = 0.00
 
-mysys.set_zealots(A,type_z = 1)
+mysys.set_zealots(A, type_z = 1)
 
-
+mysys.evol2convergence()
 
 
 

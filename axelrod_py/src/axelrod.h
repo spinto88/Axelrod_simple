@@ -62,6 +62,7 @@ struct _axl_network
         double b;
         int mode_mf; /*1 active, 0 inactive*/
         double phi;
+	int evol_opinion;
 };
 typedef struct _axl_network axl_network;
 #endif
