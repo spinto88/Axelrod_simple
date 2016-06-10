@@ -25,7 +25,7 @@ class Axl_network(nx.Graph, C.Structure):
                 ('mode_mf', C.c_int),
 		('phi', C.c_double)]
 
-    def __init__(self, n, f, q, q_z = 100, fraction = 1.0, number_of_metric_feats = 0, id_topology = 'Nan', net_parameters = {}, b = 0.0, mode_mf = 1,phi = 0.0, A = [], noise = 0.00):
+    def __init__(self, n, f, q, q_z = 100, fraction = 1.0, ff = 0,number_of_metric_feats = 0, id_topology = 'Nan', net_parameters = {}, b = 0.0, mode_mf = 1,phi = 0.0, A = [], noise = 0.00):
 
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
@@ -35,7 +35,7 @@ class Axl_network(nx.Graph, C.Structure):
         nx.empty_graph(n, self)
 
         # Init agents' states
-        self.init_agents(n, f, q, q_z, A, fraction)
+        self.init_agents(n, f, q, q_z, A, fraction, ff)
 
         # Set noise rate or number of metric features
         self.noise = noise
@@ -91,7 +91,7 @@ class Axl_network(nx.Graph, C.Structure):
             self.agent[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
             self.node[i] = self.agent[i]
 
-    def init_agents(self, n, f, q, q_z, A, fraction):
+    def init_agents(self, n, f, q, q_z, A, fraction, ff):
         """
         Iniatialize the agents' state.
         """
@@ -99,7 +99,7 @@ class Axl_network(nx.Graph, C.Structure):
         self.agent = (Axl_agent * self.nagents)()
     
         for i in range(0, self.nagents):
-            self.agent[i] = Axl_agent(f, q, q_z, fraction)
+            self.agent[i] = Axl_agent(f, q, q_z, fraction, ff)
                         
         for j in range(0,len(A)):
             self.agent[A[j]].zealot = 1

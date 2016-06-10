@@ -2,7 +2,7 @@
 
 void evolution(axl_network *mysys, int *neighbors, int seed)
 {
-	int i, j, f, r, k, sum;	
+	int i, j, f, ff, r, k, sum;	
         int n = mysys->nagents;
         int diff_q, diff_frac;
         double h_ab, random, fraction;
@@ -30,17 +30,30 @@ void evolution(axl_network *mysys, int *neighbors, int seed)
        		j = neighbors[i];
                 /* j == -1 is the Mass Media, which is described below */
 				
-		/* Homophily between agent i and j */
-		h_ab = homophily(mysys->agent[i], mysys->agent[j]);
-
+		
+		f = mysys->agent[i].f;
+		ff = mysys->agent[i].ff;
+		
+        /* Homophily between agent i and j */
+        h_ab = homophily(mysys->agent[i], mysys->agent[j]);
+        
     		random = (((double)rand())/RAND_MAX);
+                sum = 0;
+
+		for(k=0;k<(f-ff);k++)
+		{
+			if(mysys->agent[i].feat[k] == mysys->agent[j].feat[k])
+				sum++;
+		}
 	   	
 		/* If the interaction takes place */
 				    
-		if((random < h_ab)&&(h_ab != 1.00))
+		if((random < h_ab)&&(h_ab != 1.00)&&(sum != (f-ff)))
 		{
 			/* Take a random feature where the agents have a different value */
-			f = mysys->agent[i].f;
+
+			f = f - ff; //This is to fix some features, if ff = 0 no change is made
+			
 			fraction = mysys->agent[i].fraction;
 					
 			if((mysys->agent[j].zealot == 1)&&(mysys->agent[i].feat[0] != mysys->agent[j].feat[0]))
