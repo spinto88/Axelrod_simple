@@ -19,13 +19,12 @@ class Axl_network(nx.Graph, C.Structure):
     _fields_ = [('nagents', C.c_int),
                 ('agent', C.POINTER(Axl_agent)),
                 ('noise', C.c_double),
-		('number_of_metric_feats', C.c_int),
 		('mass_media', Axl_mass_media),
 		('b', C.c_double),
                 ('mode_mf', C.c_int),
 		('phi', C.c_double)]
 
-    def __init__(self, n, f, q, q_z = 100, fraction = 1.0, number_of_metric_feats = 0, id_topology = 'Nan', net_parameters = {}, b = 0.0, mode_mf = 1,phi = 0.0, A = [], noise = 0.00):
+    def __init__(self, n, f, q, q_z = 100, id_topology = 'Nan', net_parameters = {}, b = 0.00, mode_mf = 0, phi = 0.0, A = [], noise = 0.00):
 
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
@@ -35,17 +34,16 @@ class Axl_network(nx.Graph, C.Structure):
         nx.empty_graph(n, self)
 
         # Init agents' states
-        self.init_agents(n, f, q, q_z, A, fraction)
+        self.init_agents(n, f, q, q_z, A)
 
         # Set noise rate or number of metric features
         self.noise = noise
-	self.number_of_metric_feats = number_of_metric_feats
  
         # Init mass media or external scalar field
         self.mass_media = Axl_mass_media(f, q)
-	self.b = b
-	self.phi = phi
+        self.b = b
         self.mode_mf = mode_mf
+	self.phi = phi
         self.n = n
         # Init topology
         if id_topology != 'Nan':
@@ -91,7 +89,7 @@ class Axl_network(nx.Graph, C.Structure):
             self.agent[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
             self.node[i] = self.agent[i]
 
-    def init_agents(self, n, f, q, q_z, A, fraction):
+    def init_agents(self, n, f, q, q_z, A):
         """
         Iniatialize the agents' state.
         """
@@ -99,11 +97,11 @@ class Axl_network(nx.Graph, C.Structure):
         self.agent = (Axl_agent * self.nagents)()
     
         for i in range(0, self.nagents):
-            self.agent[i] = Axl_agent(f, q, q_z, fraction)
+            self.agent[i] = Axl_agent(f, q)
                         
-        for j in range(0,len(A)):
-            self.agent[A[j]].zealot = 1
-            self.agent[A[j]].feat[0] = q_z-1
+        for j in A::
+            self.agent[j].zealot = 1
+            self.agent[j].opinion = q_z
 
     def set_zealots(self, A, type_z):
         for item in A:
@@ -124,8 +122,8 @@ class Axl_network(nx.Graph, C.Structure):
 
         q_z = self.agent[0].q_z
         
-        # The adherents have a q equal to qz-1
-        adherents = libc.adherents_counter(self, q_z-1)
+        # The adherents have a q equal to qz
+        adherents = libc.adherents_counter(self, q_z)
         adherents = float(adherents)/self.nagents
         
         return adherents
@@ -139,13 +137,13 @@ class Axl_network(nx.Graph, C.Structure):
         
         q_z = self.agent[0].q_z
 
-        adherents = np.zeros(q_z)        
-        for q in range(0, q_z):
+        adherents = np.zeros(q_z + 1)        
+        for q in range(0, q_z + 1):
             adherents[q] += float(libc.adherents_counter(self, q)) / self.nagents
         
-        average = np.average(range(0, q_z), weights = adherents)
+        average = np.average(range(0, q_z + 1), weights = adherents)
         desviation = 0
-        for q in range(0, q_z):
+        for q in range(0, q_z + 1):
             desviation += abs(average - q) * adherents[q]
 
         return adherents, average, desviation
@@ -162,7 +160,7 @@ class Axl_network(nx.Graph, C.Structure):
         figure = plt.figure(1)
         figure.clf()
 
-        plt.hist(range(0, q_z), bins = q_z, weights = adherents, normed = True)
+        plt.hist(range(0, q_z + 1), bins = q_z + 1, weights = adherents, normed = True)
         plt.xlabel('Q value of the first feature')
         plt.ylabel('Normalized histogram')
         if fname == '':
@@ -190,9 +188,9 @@ class Axl_network(nx.Graph, C.Structure):
         
         for i in range(0,self.nagents):
         
-            aux = rand.randint(0, q_z-1)
+            aux = rand.randint(0, q_z)
             
-            if(aux < float(self.agent[i].feat[0])):
+            if(aux < float(self.agent[i].opinion)):
                 # 0 means that the agent is not vaccinated
                 self.agent[i].vaccine = 0
             else:
@@ -281,12 +279,12 @@ class Axl_network(nx.Graph, C.Structure):
         # feat0_distribution returns a dictionary with all clusters in the system, 
 	# its first feature and size
         if(type_search == 0):
-            feat0_distribution = []
-            feat0_distribution_size = []
+            opinion_distribution = []
+            opinion_distribution_size = []
             for i in range(0, len(labels)):
                 if labels[i] != 0:
-                    feat0_distribution.append({'First feature': self.agent[i].feat[0], 'Size': labels[i]})
-                    feat0_distribution_size.append(labels[i])
+                    opinion_distribution.append({'First feature': self.agent[i].opinion, 'Size': labels[i]})
+                    opinion_distribution_size.append(labels[i])
         elif(type_search == 1):
             vaccine_distribution = []
            
@@ -408,7 +406,7 @@ class Axl_network(nx.Graph, C.Structure):
             for i in range(0, n):
                 row = []
                 for j in range(0, n):
-                    row.append(self.agent[(j + (i*n))].feat[0])
+                    row.append(self.agent[(j + (i*n))].opinion)
                 matrix.append(row)
 
             if fname != '':
