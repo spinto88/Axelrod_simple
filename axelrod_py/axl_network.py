@@ -22,9 +22,10 @@ class Axl_network(nx.Graph, C.Structure):
 		('number_of_metric_feats', C.c_int),
 		('mass_media', Axl_mass_media),
 		('b', C.c_double),
-                ('mode_mf', C.c_int)]
+                ('mode_mf', C.c_int),
+		('phi', C.c_double)]
 
-    def __init__(self, n, f, q, q_z = 100, fraction = 1.0, number_of_metric_feats = 0, id_topology = 'Nan', net_parameters = {}, b = 0.0, mode_mf = 1, A = [], noise = 0.00):
+    def __init__(self, n, f, q, q_z = 100, fraction = 1.0, number_of_metric_feats = 0, id_topology = 'Nan', net_parameters = {}, b = 0.0, mode_mf = 1,phi = 0.0, A = [], noise = 0.00):
 
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
@@ -43,13 +44,38 @@ class Axl_network(nx.Graph, C.Structure):
         # Init mass media or external scalar field
         self.mass_media = Axl_mass_media(f, q)
 	self.b = b
+	self.phi = phi
         self.mode_mf = mode_mf
-
+        self.n = n
         # Init topology
         if id_topology != 'Nan':
             self.set_topology(id_topology, net_parameters)
 
    
+
+    def subgraph_max(self):
+        # Return a copy of 
+        
+        #self.set_topology(id_topology = 2.1)
+        maximo, distribution, label_max = self.fragment_identifier(type_search = 1)
+
+        nbunch = []
+        
+        for i in range(0,self.n):
+            if (self.agent[i].label == label_max):
+                nbunch.append(i)
+        
+        H = nx.Graph()
+	
+        for i in nbunch:
+            H.add_node(i)
+            for j in range(0,self.agent[i].degree):
+                node = self.agent[i].neighbors[j]
+                if((i>node) and (node in nbunch)):
+                    H.add_edge(i,node)
+      
+        return H, maximo, distribution 
+
     def set_topology(self, id_topology, parameters = {}, opinion_links = 'No'):
         """
         Set the network's topology
@@ -74,11 +100,15 @@ class Axl_network(nx.Graph, C.Structure):
     
         for i in range(0, self.nagents):
             self.agent[i] = Axl_agent(f, q, q_z, fraction)
-            if i in A:
-                self.agent[i].zealot = 1
-                self.agent[i].feat[0] = q_z-1
+                        
+        for j in range(0,len(A)):
+            self.agent[A[j]].zealot = 1
+            self.agent[A[j]].feat[0] = q_z-1
 
-
+    def set_zealots(self, A, type_z):
+        for item in A:
+            self.agent[item].zealot = type_z
+            
     def set_initial_state_equal(self, feature = 0):
 
         for i in range(0, self.nagents):
@@ -119,7 +149,8 @@ class Axl_network(nx.Graph, C.Structure):
             desviation += abs(average - q) * adherents[q]
 
         return adherents, average, desviation
-
+        
+    
     def adherents_hist(self, fname = ''):
         
         adherents = self.adherents_distribution()[0]
@@ -159,9 +190,9 @@ class Axl_network(nx.Graph, C.Structure):
         
         for i in range(0,self.nagents):
         
-            aux = rand.random()
+            aux = rand.randint(0, q_z-1)
             
-            if(aux < float(self.agent[i].feat[0])/(q_z-1)):
+            if(aux < float(self.agent[i].feat[0])):
                 # 0 means that the agent is not vaccinated
                 self.agent[i].vaccine = 0
             else:
@@ -256,34 +287,41 @@ class Axl_network(nx.Graph, C.Structure):
                 if labels[i] != 0:
                     feat0_distribution.append({'First feature': self.agent[i].feat[0], 'Size': labels[i]})
                     feat0_distribution_size.append(labels[i])
-        else:
+        elif(type_search == 1):
             vaccine_distribution = []
-            vaccine_distribution_size = []
+           
             for i in range(0, len(labels)):
                 if labels[i] != 0:
-                    vaccine_distribution.append([self.agent[i].vaccine,labels[i]])
-                    vaccine_distribution_size.append(labels[i])
-        
-        if (clustering_radio == 0 and type_search == 0):
+                    vaccine_distribution.append([self.agent[i].vaccine,labels[i],i])
+        elif(type_search == 10):
+            cluster_distribution = []
+           
+            for i in range(0, len(labels)):
+                if labels[i] != 0:
+                    cluster_distribution.append(labels[i])        
+                    
+                    
+        if(clustering_radio == 0 and type_search == 0):
             # feat is the first feature of the biggest fragment
             feat = self.agent[index_max].feat[0]
             return size_max, feat, feat0_distribution
-        elif (type_search != 0):
-        
+       	elif(clustering_radio != 0 and type_search == 0):
+            # Size of the biggest fragment and size distribution
+	    return size_max, feat0_distribution_size
+	elif(type_search == 1):
+	    # Returns Size cluster max no vaccinated, distribution of vaccinated and not, label of the cluster max of no vaccinated
             no_vaccine_data = []
-
+            no_vaccine_label = []
             for item in vaccine_distribution:
                 if(item[0] == 0):
                     no_vaccine_data.append(item[1])
-                    
+                    no_vaccine_label.append(item[2])
             if(no_vaccine_data == []):
                 no_vaccine_data.append(0)
-                
-            return vaccine_distribution, np.max(no_vaccine_data)
-	else:
-            # Size of the biggest fragment and size distribution
-	    return size_max, feat0_distribution_size
-        
+            
+            return np.max(no_vaccine_data),no_vaccine_data,no_vaccine_label[no_vaccine_data.index(np.max(no_vaccine_data))]
+	elif(type_search == 10):
+	    return size_max, cluster_distribution           
 
     def active_links(self):
 
@@ -331,11 +369,11 @@ class Axl_network(nx.Graph, C.Structure):
 
             data2average = []
             
-            self.evolution(1000)#99000)
-            steps += 1000#99000
+            self.evolution(1000)
+            steps += 1000
             for i in range(0, 10):
-                self.evolution(10)#100)
-                steps += 10#100
+                self.evolution(10)
+                steps += 10
                 data2average.append(self.adherents_distribution()[1])
                 
             for num in data2average:
@@ -375,6 +413,7 @@ class Axl_network(nx.Graph, C.Structure):
 
             if fname != '':
                 np.savetxt(fname + '.txt', matrix)
+            plt.ion()
 
             figure = plt.figure(1)
             figure.clf()
@@ -383,7 +422,7 @@ class Axl_network(nx.Graph, C.Structure):
             if fname != '':
                 plt.savefig(fname + '.png')
             else:
-                plt.show()
+                figure.canvas.draw()
 
         else:
             print "The system's network is not a square lattice"
@@ -412,19 +451,19 @@ class Axl_network(nx.Graph, C.Structure):
 
             if fname != '':
                 np.savetxt(fname + '.txt', matrix)
-
+            plt.ion()
             cmap = colors.ListedColormap(['red', 'green'])
             bounds=[0,0.1,1]
             norm = colors.BoundaryNorm(bounds, cmap.N)
 
-            figure = plt.figure(1)
+            figure = plt.figure(2)
             figure.clf()
             plt.imshow(matrix, interpolation='nearest', origin='lower',cmap=cmap, norm=norm)
             plt.colorbar(cmap=cmap, norm=norm, boundaries=bounds, ticks=[0, 1])
             if fname != '':
                 plt.savefig(fname + '.png')
             else:
-                plt.show()
+                figure.canvas.draw()
 
         else:
             print "The system's network is not a square lattice"

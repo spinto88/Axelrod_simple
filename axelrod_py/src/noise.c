@@ -24,7 +24,11 @@ int noise(axl_network *mysys, int seed)
                 q = mysys->agent[i].q;
 
 		j = rand() % f;
-		if((((double)rand())/RAND_MAX) < r)
+		if(f==0 && mysys->agent[i].zealot == 1)
+		{
+		    continue;
+		}
+		else if((((double)rand())/RAND_MAX) < r)
 		{
 			mysys->agent[i].feat[j] = rand() % q;
 			changes++;

@@ -61,6 +61,7 @@ struct _axl_network
         axl_mass_media mass_media;
         double b;
         int mode_mf; /*1 active, 0 inactive*/
+        double phi;
 };
 typedef struct _axl_network axl_network;
 #endif
