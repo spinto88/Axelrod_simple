@@ -12,6 +12,7 @@
 struct _axl_agent
 {
 	int f; /*!< Number of features.*/
+        int ff; /* Fix features */
 	int q; /*!< Number of traits per feature.*/
 	int q_z; /* Maximmun value of the opinion */
 	int opinion; /* Opinion about vaccinated */

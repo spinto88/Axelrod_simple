@@ -11,6 +11,7 @@ class Axl_agent(C.Structure):
     """
 
     _fields_ = [('f', C.c_int),
+                ('ff', C.c_int),
 		('q', C.c_int),
                 ('q_z', C.c_int),
                 ('opinion', C.c_int),
@@ -26,7 +27,7 @@ class Axl_agent(C.Structure):
 		('opinion_links', C.POINTER(C.c_int))]
 
 
-    def __init__(self, f, q, q_z):
+    def __init__(self, f, q, q_z, ff):
         """
         Constructor: f number of features, q number of traits per feature, q_z number of traits of the first feature only.
         """
@@ -34,6 +35,7 @@ class Axl_agent(C.Structure):
         self.q = q
         self.q_z = q_z   
         self.init_agent()
+        self.ff = ff
         self.zealot = 0
         self.vaccine = 0
 
