@@ -49,6 +49,8 @@ class Axl_network(nx.Graph, C.Structure):
         if id_topology != 'Nan':
             self.set_topology(id_topology, net_parameters)
 
+        self.evol_opinion = 0
+
    
 
     def subgraph_max(self):

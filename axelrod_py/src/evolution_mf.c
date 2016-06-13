@@ -30,10 +30,14 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 	{ 
    		random = (((double)rand())/RAND_MAX);
 
-		if((random < phi) && (mysys->agent[i].zealot != 1) && (mysys->evol_opinion == 1))
+		if((random < phi) && (mysys->evol_opinion == 1))
 		{
-			Changes[i].x = f;
-			Changes[i].value = rand() % (mysys->agent[i].opinion + 1);
+			if(mysys->agent[i].zealot != 1)
+			{
+				// f - ff is the way to indicate that the opinion must be changed
+				Changes[i].x = mysys->agent[i].f - mysys->agent[i].ff;
+				Changes[i].value = rand() % (mysys->agent[i].opinion + 1);
+			}
 		}
 
 		else
@@ -41,10 +45,10 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 			/* Normal interaction with neighbors*/
        			j = neighbors[i];
 
-		        f = mysys->agent[i].f;
+			f = mysys->agent[i].f;
 			ff = mysys->agent[i].ff;
 
-			/* Homophily between agent i and j */
+			/* Homophily between agent i and j. It's not include the opinion as a feature. */
 			h_ab = homophily(mysys->agent[i], mysys->agent[j]);
 					    
     			random = (((double)rand())/RAND_MAX);
@@ -58,7 +62,7 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 		        }
 	   		   	
 			/* If the interaction takes place */
-	    		if((random < h_ab) && (h_ab != 1.00) && (sum != (f-ff)) && (mysys->agent[i].opinion != mysys->agent[j].opinion))
+	    		if(random < h_ab)
 			{
 				/* Take a random feature where the agents have a different value */
 
@@ -72,18 +76,18 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 
 			   		else
 					{
-						if(sum == (f-ff))
+						if(sum == f)
 							r = f;
 						else
 						{
-				    			r = rand() % (ff + 1);
-							if(r == ff)
+				    			r = rand() % (f + 1);
+							if(r == f)
 							{
 								if(mysys->agent[i].opinion == mysys->agent[j].opinion)
 								{
-									r = (r + 1) % (ff + 1);
+									r = (r + 1) % f;
 									while(mysys->agent[i].feat[r] == mysys->agent[j].feat[r])
-								    		r = (r + 1) % ff;
+								    		r = (r + 1) % f;
 								}
 								else
 									r = f;
@@ -104,9 +108,9 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 
 						/* The new value is the actual value plus (less) a random value inside the difference */
 						if(diff_q > 0)
-							Changes[i].value = mysys->agent[j].feat[r] + (rand() % (diff_q + 1));
+							Changes[i].value = mysys->agent[j].opinion + (rand() % (diff_q + 1));
 						else
-							Changes[i].value = mysys->agent[j].feat[r] - (rand() % (abs(diff_q) + 1));
+							Changes[i].value = mysys->agent[j].opinion - (rand() % (abs(diff_q) + 1));
 					}				
 
 					/* Else (if it is not metric) take the exact feature of j */
@@ -116,11 +120,13 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 				else
 				{
 					r = rand() % f;
-					if(mysys->agent[i].feat[r] == mysys->agent[j].feat[r])
-						r = (r + 1) % f;
-
-					Changes[i].x = r;
-					Changes[i].value = mysys->agent[j].feat[r];
+					if(sum != f)
+					{
+						while(mysys->agent[i].feat[r] == mysys->agent[j].feat[r])
+							r = (r + 1) % f;
+						Changes[i].x = r;
+						Changes[i].value = mysys->agent[j].feat[r];
+					}
 				}
 			}
 		}
@@ -133,6 +139,10 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 		r = Changes[i].x;
 		if(r!=-1)
 		{
+			f = mysys->agent[i].f;
+			ff = mysys->agent[i].ff;
+			f = f - ff;
+
 			if(r == f)
 				mysys->agent[i].opinion = Changes[i].value;
 			else
