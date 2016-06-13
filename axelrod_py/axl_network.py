@@ -23,7 +23,8 @@ class Axl_network(nx.Graph, C.Structure):
 		('b', C.c_double),
                 ('mode_mf', C.c_int),
 		('phi', C.c_double),
-		('evol_opinion', C.c_int)]
+		('evol_opinion', C.c_int),
+		('opinion_included', C.c_int)]
 
     def __init__(self, n, f, q, q_z = 100, ff = 0, id_topology = 'Nan', net_parameters = {}, b = 0.00, mode_mf = 0, phi = 0.0, A = [], noise = 0.00):
         """
@@ -108,7 +109,8 @@ class Axl_network(nx.Graph, C.Structure):
     def set_zealots(self, A, type_z):
         for item in A:
             self.agent[item].zealot = type_z
-            
+        self.agent[item].opinion = q_z
+ 
     def set_initial_state_equal(self, feature = 0):
 
         for i in range(0, self.nagents):
