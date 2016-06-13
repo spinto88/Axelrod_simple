@@ -2,7 +2,7 @@ from axelrod_py import *
 
 N = 10000
 F = 10
-Q = 20
+Q = 70
 Qz = 100
 Z = 10
 rand.seed(123458)
@@ -15,7 +15,7 @@ mysys = Axl_network(n = N, f = F, ff = 0, q = Q, q_z = Qz, A = A, id_topology = 
 
 #mysys.set_zealots(A, type_z = 1)
 
-#mysys.evolution(10000) 
+#mysys.evolution(1000) 
 
 mysys.image_opinion()
 mysys.vaccinate()

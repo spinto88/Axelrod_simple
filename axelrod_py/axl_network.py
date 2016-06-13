@@ -456,15 +456,23 @@ class Axl_network(nx.Graph, C.Structure):
 
             if fname != '':
                 np.savetxt(fname + '.txt', matrix)
+
             plt.ion()
             cmap = colors.ListedColormap(['red', 'green'])
-            bounds=[0,0.1,1]
+            bounds=[0, 0.1, 1]
             norm = colors.BoundaryNorm(bounds, cmap.N)
 
             figure = plt.figure(2)
             figure.clf()
-            plt.imshow(matrix, interpolation='nearest', origin='lower',cmap=cmap, norm=norm)
+
+            cmap = colors.ListedColormap(['red', 'green'])
+            bounds=[0, 0.1, 1]
+#            plt.imshow(matrix, interpolation='nearest', origin='lower',cmap=cmap, norm=norm)
+
+            plt.imshow(matrix, interpolation = 'nearest', cmap = cmap, norm = norm)
+
             plt.colorbar(cmap=cmap, norm=norm, boundaries=bounds, ticks=[0, 1])
+
             if fname != '':
                 plt.savefig(fname + '.png')
             else:

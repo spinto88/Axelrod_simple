@@ -8,6 +8,7 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
         int diff_q;
         double h_ab, random;
 	double phi = mysys->phi;
+        double delta = 0.00;
 
         /* Struct feature which has the feature to change and the new value */
 	struct Feature
@@ -49,7 +50,7 @@ void evolution_mf(axl_network *mysys, int *neighbors, int seed)
 			ff = mysys->agent[i].ff;
 
 			/* Homophily between agent i and j. It's not include the opinion as a feature. */
-			h_ab = homophily(mysys->agent[i], mysys->agent[j]);
+			h_ab = homophily(mysys->agent[i], mysys->agent[j]) + delta;
 					    
     			random = (((double)rand())/RAND_MAX);
 
