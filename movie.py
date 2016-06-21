@@ -25,10 +25,11 @@ for i in range(0,10000):
 
     mysys.evolution(10)
     mysys.rewiring()
-    
-    mysys.image_opinion()
-    mysys.vaccinate()
-    mysys.image_vaccinated()
+    print i
+    if(i%10 == 0):
+        mysys.image_opinion()
+        mysys.vaccinate()
+        mysys.image_vaccinated()
     
    
         
