@@ -11,6 +11,8 @@ A = zealots_list(N,Z)
 
 mysys = Axl_network(n = N, f = F, ff = 0, q = Q, q_z = Qz, A = A, id_topology = 2.1)
 
+mysys.set_topology(id_topology = 3.1, opinion_links = 'Yes')
+
 mysys.image_opinion()
 mysys.vaccinate()
 mysys.image_vaccinated()
@@ -21,7 +23,8 @@ mysys.phi = 0.09
 
 for i in range(0,10000):
 
-    mysys.evolution(1000)
+    mysys.evolution(10)
+    mysys.rewiring()
     
     mysys.image_opinion()
     mysys.vaccinate()

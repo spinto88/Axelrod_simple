@@ -165,7 +165,7 @@ def set_topology(G, id_topology, parameters = {}, opinion_links = 'No'):
 
         if opinion_links == 'Yes':
             for i in range(0, number_of_nodes):
-                G.agent[i].opinion_degree = G.degree(i) - G.agent[i].degree_contact
+                G.agent[i].degree_opinion = G.degree(i) - G.agent[i].degree_contact
                 opinion_links_list = G.neighbors(i)
                 for j in range(0, G.agent[i].degree_contact):
                     opinion_links_list.remove(G.agent[i].contact_links[j])
