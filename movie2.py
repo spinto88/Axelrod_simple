@@ -8,27 +8,49 @@ Z = 10
 rand.seed(123458)
 A = zealots_list(N,Z)
 
-mysys = Axl_network(n = N, f = F, ff = 0, q = Q, q_z = Qz, A = A, id_topology = 2.1)
 
-#mysys.evol_opinion = 1
-#mysys.phi = 0.0001
+for campo in range(1,3,1):
 
-#mysys.set_zealots(A, type_z = 1)
+    phi = float(campo)/1000
+    steps_data = []
 
-#mysys.evolution(1000) 
+    name = 'Vacunados_phi' + str(phi) + '.txt'
 
-mysys.image_opinion()
-mysys.vaccinate()
-mysys.image_vaccinated()
+    fp = open(name,'a')
+    fp.write('#tiempo\tvacunados\n')
+    fp.close()
 
-mysys.evol_opinion = 1
-mysys.opinion_included = 0
-mysys.phi = 0.0001
+    mysys = Axl_network(n = N, f = F, ff = 0, q = Q, q_z = Qz, A = A, id_topology = 2.1)
 
-for i in range(200):
+    #Primera etapa
+    mysys.evol_opinion = 0
+    steps = mysys.evol2convergence() 
 
-    mysys.image_opinion()
-    mysys.vaccinate()
-    mysys.image_vaccinated()
-    mysys.evolution(1000)
+    #mysys.image_opinion()
+    vaccinated = mysys.vaccinate()
+    #vaccinated = mysys.image_vaccinated()
+
+    fp = open(name,'a')
+    fp.write(str(steps) + '\t' + str(vaccinated) + '\n')
+    fp.close() 
+
+    #Segunda etapa
+    mysys.set_number_of_fixed_features(ff = F - 1)
+    mysys.evol_opinion = 1
+    mysys.opinion_included = 1
+    mysys.phi = phi
+
+    explosion = 0
+    for i in range(2000):
+
+        mysys.evolution(1000)
+        steps = steps + 1000
+
+        #mysys.image_opinion()
+        vaccinated = mysys.vaccinate()
+        #mysys.image_vaccinated()
+        
+        fp = open(name,'a')
+        fp.write(str(steps) + '\t' + str(vaccinated) + '\n')
+        fp.close()            
 

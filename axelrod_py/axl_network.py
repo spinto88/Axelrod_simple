@@ -204,6 +204,7 @@ class Axl_network(nx.Graph, C.Structure):
                 self.agent[i].vaccine = 0
             else:
                 self.agent[i].vaccine = 1
+	return self.vaccinated_counter()
 
 
     def evolution(self, steps = 1):
@@ -292,7 +293,7 @@ class Axl_network(nx.Graph, C.Structure):
             opinion_distribution_size = []
             for i in range(0, len(labels)):
                 if labels[i] != 0:
-                    opinion_distribution.append({'First feature': self.agent[i].opinion, 'Size': labels[i]})
+                    opinion_distribution.append({'Opinion feature': self.agent[i].opinion, 'Size': labels[i]})
                     opinion_distribution_size.append(labels[i])
         elif(type_search == 1):
             vaccine_distribution = []
@@ -310,8 +311,8 @@ class Axl_network(nx.Graph, C.Structure):
                     
         if(clustering_radio == 0 and type_search == 0):
             # feat is the first feature of the biggest fragment
-            feat = self.agent[index_max].feat[0]
-            return size_max, feat, feat0_distribution
+            #feat = self.agent[index_max].feat[0]
+            return size_max, opinion_distribution_size
        	elif(clustering_radio != 0 and type_search == 0):
             # Size of the biggest fragment and size distribution
 	    return size_max, feat0_distribution_size

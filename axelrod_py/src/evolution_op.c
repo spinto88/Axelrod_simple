@@ -33,7 +33,7 @@ void evolution_op(axl_network *mysys, int *neighbors, int seed)
 
 		if(random < phi)
 		{
-			if(mysys->agent[i].zealot != 1)
+			if(mysys->agent[i].zealot == 0)
 			{
 				// f - ff is the way to indicate that the opinion must be changed
 				Changes[i].x = mysys->agent[i].f - mysys->agent[i].ff;
@@ -92,12 +92,10 @@ void evolution_op(axl_network *mysys, int *neighbors, int seed)
 						{
 							if(mysys->agent[i].opinion == mysys->agent[j].opinion)
 							{
-								r = rand() % f;
+								r = (r + 1) % f;
 								while(mysys->agent[i].feat[r] == mysys->agent[j].feat[r])
 							    		r = (r + 1) % f;
 							}
-							else
-								r = f;
 						}
 						else
 						{ 
@@ -111,7 +109,7 @@ void evolution_op(axl_network *mysys, int *neighbors, int seed)
       	   			        
 				Changes[i].x = r;	
 
-        			if((mysys->agent[i].zealot == 1) && (r == f))
+        			if((mysys->agent[i].zealot != 0) && (r == f))
         	    		/* If the agent i is a zealot, it does not change the opinion */
 					Changes[i].x = -1;
 				else
