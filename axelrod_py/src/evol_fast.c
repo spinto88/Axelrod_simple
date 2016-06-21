@@ -6,11 +6,18 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 	int i, j, step;
 	int n = mysys->nagents;
 	int *neighbors;
+
 	axl_mass_media *mm = &(mysys->mass_media);
 
 	neighbors = (int *)malloc(sizeof(int) * n);
 
 	srand(seed);
+	
+	axl_network_alloc *mysys_alloc;
+	mysys_alloc = (axl_network_alloc *)malloc(sizeof(axl_network_alloc));
+	
+	init_axl_network_alloc(mysys, mysys_alloc);
+	
 
 	for(step = 0; step < steps; step++)
 	{
@@ -19,7 +26,7 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 	        for(i = 0; i < n; i++)
 		{
 			j = rand() % mysys->agent[i].degree;
-	                neighbors[i] = mysys->agent[i].neighbors[j];
+	                neighbors[i] = mysys_alloc->agent_alloc[i].neighbors_alloc[j];
 
 		}
 
@@ -51,7 +58,17 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 	}
 
 	free(neighbors);
-
+    free(mysys_alloc);
+    /*
+    free(mysys_alloc->agent_alloc);
+    for(i = 0; i < n; i++)
+    {
+        free(mysys_alloc->agent_alloc[i].neighbors_alloc);
+        free(mysys_alloc->agent_alloc[i].contact_links_alloc);
+        free(mysys_alloc->agent_alloc[i].opinion_links_alloc);
+        
+    }
+    */
 	return;
 }
 	

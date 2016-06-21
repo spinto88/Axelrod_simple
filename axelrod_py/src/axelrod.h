@@ -69,4 +69,28 @@ typedef struct _axl_network axl_network;
 #endif
 
 
+#ifndef AXL_AGENT_ALLOC
+#define AXL_AGENT_ALLOC
+
+struct _axl_agent_alloc
+{
+	int *neighbors_alloc; /* List of neighbors */
+	int *contact_links_alloc; /* List of neighbors which are contact links */
+	int *opinion_links_alloc; /* List of neighbors which are opinion links */
+};
+typedef struct _axl_agent_alloc axl_agent_alloc; /*!< struct _axl_agent redefined as axl_agent. */
+#endif
+
+
+#ifndef AXL_NETWORK_ALLOC
+#define AXL_NETWORK_ALLOC
+
+struct _axl_network_alloc
+{
+	axl_agent_alloc *agent_alloc;   
+};
+typedef struct _axl_network_alloc axl_network_alloc;
+#endif
+
+
 

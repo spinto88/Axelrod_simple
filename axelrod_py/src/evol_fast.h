@@ -8,7 +8,10 @@
 #include "evolution_op.h"
 #include "noise.h"
 #include "adaptation.h"
+#include "init_axl_network_alloc.h"
 
 void evol_fast(axl_network *, int, int);
 
 #endif
+
+

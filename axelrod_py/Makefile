@@ -1,6 +1,6 @@
 
 CC = gcc 
-CFLAGS = -fPIC -O3 -g
+CFLAGS = -fPIC -O0 -g
 LDFLAGS = -lm
 
 SRCDIR = src
