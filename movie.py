@@ -2,7 +2,7 @@ from axelrod_py import *
 
 N = 1024
 F = 10
-Q = 1000
+Q = 170
 Qz = 100
 Z = 10
 rand.seed(123458)

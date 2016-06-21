@@ -13,6 +13,6 @@ struct _top_changes
 };
 typedef struct _top_changes top_changes;
 
-void rewiring(axl_network, top_changes *);
+void rewiring(axl_network *mysys, top_changes *, axl_network_alloc *mysys_alloc);
 
 #endif
