@@ -5,7 +5,7 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 {
 	int i, j, step;
 	int n = mysys->nagents;
-	int *neighbors;
+	int *neighbors, rewiring_on;
 
 	axl_mass_media *mm = &(mysys->mass_media);
 
@@ -21,7 +21,7 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 
 	for(step = 0; step < steps; step++)
 	{
-
+		rewiring_on = rewiring(mysys,mysys_alloc);
 		/* Select a lattice neighbors */
 	        for(i = 0; i < n; i++)
 		{
@@ -29,7 +29,8 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 	                neighbors[i] = mysys_alloc->agent_alloc[i].neighbors_alloc[j];
 
 		}
-
+		
+		
 		if(mysys->mass_media.b != 0.00)
 		{
 			for(i = 0; i < n; i++)
