@@ -17,7 +17,7 @@ int active_links(axl_network mysys)
 		for(j = 0; j < mysys.agent[i].degree; j++)
 		{
                         neighbor = mysys.agent[i].neighbors[j];
-			hab = homophily(mysys.agent[i], mysys.agent[neighbor]);
+			hab = homophily(mysys.agent[i], mysys.agent[neighbor], mysys.opinion_included);
 			if((0.00 < hab) && (hab < 1.00))
 				return 1;
 		}

@@ -10,18 +10,25 @@ brange = [0.05]
 
 
 
-data = np.loadtxt('Top1.1_Z10_b0.07_Q600.dat')
+for Q in range(20,101,80):
+    for campo in range(0,100,5):
+        phi = float(campo)/1000
+    
+        name = 'distribucion_phi' + str(phi) + '_q' + str(Q)
+        name2 = 'distribucion_phi' + str(phi) + '_q' + str(Q) + 'hist.eps'
+        data = np.loadtxt(name)
 
-histo = np.zeros(100)
+        histo = np.zeros(100)
 
-for i in range(len(data)):
-    histo += data[i]
+        for i in range(len(data)):
+            histo += data[i]
 
-#        plt.clf()
-data = plt.hist(range(100), bins = 100, weights = histo, normed = True)
-plt.xlabel('First feature')
-plt.ylabel('Frequency')
-#        plt.title('Z = ' + str(z) + ' b = ' + str(b))
-plt.savefig('Z10_b0.07_Q600.eps')
-plt.show()
+        #        plt.clf()
+        data = plt.hist(data, bins = 100, normed = True)
+        plt.xlabel('First feature')
+        plt.ylabel('Frequency')
+        #plt.xlim(0, 500)
+        #        plt.title('Z = ' + str(z) + ' b = ' + str(b))
+        plt.savefig(name2)
+        plt.show()
                 

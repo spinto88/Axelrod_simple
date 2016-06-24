@@ -12,13 +12,13 @@
 struct _axl_agent
 {
 	int f; /*!< Number of features.*/
+        int ff; /* Fix features */
 	int q; /*!< Number of traits per feature.*/
-	int q_z;
-	double fraction; /*Change a feature A with metric to a value in a fraction of the distance between A and B, from neighbour B. fraction = 0 normal axelrod */
-	int ff; /*fix features*/
+	int q_z; /* Maximmun value of the opinion */
+	int opinion; /* Opinion about vaccinated */
 	int *feat; /*!< Cutural vector with f components.*/
-	double zealot;
-	int vaccine;
+	double zealot; /* Probability to be zealot */
+	int vaccine; /* To vaccine or not to vaccine, that is the cuestion...*/
 	int degree; /* Degree of the node */
 	int label; /* Label useful for the fragment identifier */
 	int *neighbors; /* List of neighbors */
@@ -58,11 +58,12 @@ struct _axl_network
 	int nagents; /* Number of axelrod agents in the network */
 	axl_agent *agent; /* Vector of axelrod agents */
         double noise; /* Rate of noise */
-        int number_of_metric_feats; /* This is the number of features which are metric. If it's larger than f, it means that all features are metric */
         axl_mass_media mass_media;
         double b;
         int mode_mf; /*1 active, 0 inactive*/
         double phi;
+	int evol_opinion;
+	int opinion_included;
 };
 typedef struct _axl_network axl_network;
 #endif
