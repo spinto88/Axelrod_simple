@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import math 
 
 Q=100
-phi = 0.05
+phi = 0.0009
     
 name = 'distribucion_no_vac_phi' + str(phi) + '_q' + str(Q)
 name2 = 'distribucion_phi' + str(phi) + '_q' + str(Q) + 'log.eps'
@@ -11,9 +11,6 @@ data = np.loadtxt(name)
 
 X = []
 Y = []
-logX = []
-logY = []
-fit = []
 
 x,bins,p = plt.hist(data, bins = 1024, normed = True)
 

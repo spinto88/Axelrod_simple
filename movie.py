@@ -17,7 +17,7 @@ mysys.image_vaccinated()
 
 mysys.evol_opinion = 1  #evolucionar la opinion
 mysys.opinion_included = 1    #incluir la opinion en la homofilia
-mysys.phi = 0.001
+mysys.phi = 0.0001
 
 for i in range(0,200):
 
