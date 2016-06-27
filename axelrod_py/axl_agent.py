@@ -18,12 +18,10 @@ class Axl_agent(C.Structure):
                 ('feat', C.POINTER(C.c_int)),
                 ('zealot', C.c_double),
                 ('vaccine', C.c_int),
-		('degree', C.c_int),
 		('label', C.c_int),
-		('neighbors', C.POINTER(C.c_int)),
-                ('degree_contact', C.c_int),
+                ('contact_degree', C.c_int),
                 ('contact_links', C.POINTER(C.c_int)),
-                ('degree_opinion', C.c_int),
+                ('opinion_degree', C.c_int),
 		('opinion_links', C.POINTER(C.c_int))]
 
 

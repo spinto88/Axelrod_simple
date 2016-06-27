@@ -6,6 +6,8 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 	int i, j, step;
 	int n = mysys->nagents;
 	int *neighbors;
+	int total_degree;
+	double random;
 	axl_mass_media *mm = &(mysys->mass_media);
 
 	neighbors = (int *)malloc(sizeof(int) * n);
@@ -18,8 +20,29 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 		/* Select a lattice neighbors */
 	        for(i = 0; i < n; i++)
 		{
-			j = rand() % mysys->agent[i].degree;
-	                neighbors[i] = mysys->agent[i].neighbors[j];
+			if(mysys->rewiring == 0)
+			{
+				j = rand() % mysys->agent[i].contact_degree;
+	        	        neighbors[i] = mysys->agent[i].contact_links[j];
+			}
+
+			else if(mysys->rewiring == 1)
+			{ 			
+				total_degree = mysys->agent[i].contact_degree + mysys->agent[i].opinion_degree;
+
+				random = ((double)rand()) / RAND_MAX;
+
+				if(random < (((double)mysys->agent[i].contact_degree) / total_degree))
+				{
+					j = rand() % mysys->agent[i].contact_degree;
+		        	        neighbors[i] = mysys->agent[i].contact_links[j];
+				}
+				else
+				{
+					j = rand() % mysys->agent[i].opinion_degree;
+				        neighbors[i] = mysys->agent[i].opinion_links[j];	
+				}
+			}
 
 		}
 
@@ -41,14 +64,10 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 		}
 
 		evolution_mf(mysys, neighbors, rand());
-/*
-		if(mysys->b == 0.00 && mysys->phi == 0.00)
-			evolution(mysys, neighbors, rand());
-		else if(mysys->phi != 0.00)
-			evolution_mf(mysys, neighbors, rand());
-	    else if(mysys->b != 0.00)
-            evolution_mfb(mysys, neighbors, rand());
-*/
+		
+		if(mysys->rewiring == 1)
+			rewiring(mysys, rand());
+
                 if(mysys->noise > 0.00)
 			noise(mysys, rand());
 

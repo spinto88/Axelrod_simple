@@ -19,12 +19,10 @@ struct _axl_agent
 	int *feat; /*!< Cutural vector with f components.*/
 	double zealot; /* Probability to be zealot */
 	int vaccine; /* To vaccine or not to vaccine, that is the cuestion...*/
-	int degree; /* Degree of the node */
-	int label; /* Label useful for the fragment identifier */
-	int *neighbors; /* List of neighbors */
-	int degree_contact; /* Degree of the list of contact neighbors */
+	int label;
+	int contact_degree; /* Degree of the list of contact neighbors */
 	int *contact_links; /* List of neighbors which are contact links */
-	int degree_opinion; /* Degree of the list of only opinion neighbors */
+	int opinion_degree; /* Degree of the list of only opinion neighbors */
 	int *opinion_links; /* List of neighbors which are opinion links */
 };
 typedef struct _axl_agent axl_agent; /*!< struct _axl_agent redefined as axl_agent. */
@@ -63,6 +61,7 @@ struct _axl_network
         int mode_mf; /*1 active, 0 inactive*/
         double phi;
 	int evol_opinion;
+	int rewiring;
 };
 typedef struct _axl_network axl_network;
 #endif

@@ -1,59 +1,102 @@
 
 #include "rewiring.h"
 
-/* This function puts in "changes" the old and new neighbour for a given agent.
-   The criteria of change a neighbour is that the homophily with the older is less 
+/* The criteria of change a neighbour is that the homophily with the older is less 
    than with the new neighbour. But this only takes only opinion links */
 
-void rewiring(axl_network mysys, top_changes *changes)
+int agent_in_list(axl_network *, int, int);
+
+void rewiring(axl_network *mysys, int seed)
 {
-	int i, j, neigh_ind;
-	int old, new;
-	int n = mysys.nagents;
-	double h_old, h_new;
+	int i, j;
+	int ind_old, ind_i;
+	int new, old;
+	int agent;
+	int n = mysys->nagents;
+	double h_new, h_old;
+
+	int *list_agents;
+
+	srand(seed);
+
+	list_agents = (int *)malloc(sizeof(int) * n);
+
+	for(i = 0; i < n; i++)
+		list_agents[i] = i;
 
 	for(i = 0; i < n; i++)
 	{
-		if(mysys.agent[i].degree_opinion != 0)
+		j = rand() % n;
+		swap(list_agents + i, list_agents + j);
+	}
+
+
+	for(i = 0; i < n; i++)
+	{
+		agent = list_agents[i];
+
+		if(mysys->agent[agent].opinion_degree > 0)
 		{
-	                /* The neighbour to be replace is chosen of the list of opinion links */
-			neigh_ind = rand() % mysys.agent[i].degree_opinion;
-			old = mysys.agent[i].opinion_links[neigh_ind];
 
-			/* The proposed agent is taken by random choice */
-			new = rand() % mysys.nagents;
+			ind_old = rand() % mysys->agent[agent].opinion_degree;
+			old = mysys->agent[agent].opinion_links[ind_old];	
+			
+			new = rand() % n;
+			while(agent_in_list(mysys, agent, new) == 1)
+				new = rand() % n;
 
-        	        /* Calculate and compare the homophily of the agents */
-			h_old = homophily(mysys.agent[i], mysys.agent[old]);
-			h_new = homophily(mysys.agent[i], mysys.agent[new]);
+			h_old = homophily(mysys->agent[agent], mysys->agent[old]);
+			h_new = homophily(mysys->agent[agent], mysys->agent[new]);	
 
-	                /* The change is not made if the links already exists */
-			if(h_old < h_new)
+			if(h_new > h_old)
 			{
-				changes[i].remove = old;
-				changes[i].add = new;
-                	        for(j = 0; j < mysys.agent[i].degree; j++)
+				mysys->agent[agent].opinion_links[ind_old] = new;
+
+				mysys->agent[new].opinion_links[mysys->agent[new].opinion_degree] = agent;
+				mysys->agent[new].opinion_degree += 1;
+
+				for(j = 0; j < mysys->agent[old].opinion_degree; j++)
 				{
-					if(new == mysys.agent[i].neighbors[j])
+					if(mysys->agent[old].opinion_links[j] == agent)
 					{
-						changes[i].remove = -1;
-						changes[i].add = -1;
+						ind_i = j;
+
+						swap(&mysys->agent[old].opinion_links[ind_i], &mysys->agent[old].opinion_links[mysys->agent[old].opinion_degree - 1]);
+						mysys->agent[old].opinion_links[mysys->agent[old].opinion_degree - 1] = -1;
+						mysys->agent[old].opinion_degree -= 1;
+
+						break;
 					}
 				}
-				if(new == i)
-				{	
-					changes[i].remove = -1;
-					changes[i].add = -1;
-				}
-			}	
-			else
-			{
-				changes[i].remove = -1;
-				changes[i].add = -1;
 			}
 		}
+
 	}
-	
-	return;			
-			
-}	
+
+	free(list_agents);
+
+	return;
+}
+
+
+int agent_in_list(axl_network *mysys, int agent, int new)
+{
+	int i;
+
+	for(i = 0; i < mysys->agent[agent].contact_degree; i++)
+	{
+		if(new == mysys->agent[agent].contact_links[i])
+			return 1;
+	}
+
+	for(i = 0; i < mysys->agent[agent].opinion_degree; i++)
+	{
+		if(new == mysys->agent[agent].opinion_links[i])
+			return 1;
+	}
+
+	if(agent == new)
+		return 1;
+
+	return 0;
+}

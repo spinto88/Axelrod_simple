@@ -23,9 +23,10 @@ class Axl_network(nx.Graph, C.Structure):
 		('b', C.c_double),
                 ('mode_mf', C.c_int),
 		('phi', C.c_double),
-		('evol_opinion', C.c_int)]
+		('evol_opinion', C.c_int),
+		('rewiring', C.c_int)]
 
-    def __init__(self, n, f, q, q_z = 100, ff = 0, id_topology = 'Nan', net_parameters = {}, b = 0.00, mode_mf = 0, phi = 0.0, A = [], noise = 0.00):
+    def __init__(self, n, f, q, q_z = 100, ff = 0, id_topology = 'Nan', net_parameters = {}, b = 0.00, mode_mf = 0, phi = 0.0, A = [], noise = 0.00, rewiring = 0):
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
 	"""
@@ -45,6 +46,7 @@ class Axl_network(nx.Graph, C.Structure):
         self.mode_mf = mode_mf
 	self.phi = phi
         self.n = n
+	self.rewiring = rewiring
         # Init topology
         if id_topology != 'Nan':
             self.set_topology(id_topology, net_parameters)
@@ -76,20 +78,24 @@ class Axl_network(nx.Graph, C.Structure):
       
         return H, maximo, distribution 
 
-    def set_topology(self, id_topology, parameters = {}, opinion_links = 'No'):
+    def set_topology(self, id_topology, parameters = {}):
         """
         Set the network's topology
         """
         self.id_topology = id_topology
 
-        setop.set_topology(self, id_topology, parameters, opinion_links)
+        setop.set_topology(self, id_topology, parameters)
 
         self.nagents = self.number_of_nodes()
 
         for i in range(0, self.number_of_nodes()):
-            self.agent[i].degree = self.degree(i)
-            self.agent[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
+            self.agent[i].contact_degree = self.degree(i)
+            self.agent[i].contact_links = (C.c_int * self.degree(i))(*self.neighbors(i))
             self.node[i] = self.agent[i]
+
+	if self.rewiring == 1:
+	    libc.init_network.argtypes = [C.POINTER(Axl_network)]
+	    libc.init_network(C.byref(self))
 
     def init_agents(self, n, f, q, q_z, A, ff):
         """

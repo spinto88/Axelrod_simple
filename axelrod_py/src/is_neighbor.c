@@ -8,9 +8,9 @@ It sees if the index of the agent 2 is in the list of neighbors of agent 1.
 */
 	int i;
 
-	for(i = 0; i < agent1.degree; i++)
+	for(i = 0; i < agent1.contact_degree; i++)
 	{
-		if(ind_agent2 == agent1.neighbors[i])
+		if(ind_agent2 == agent1.contact_links[i])
 			return 1;
 	}
 	return 0;

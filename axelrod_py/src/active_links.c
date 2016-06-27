@@ -14,9 +14,9 @@ int active_links(axl_network mysys)
 
         for(i = 0; i < n; i++)
 	{
-		for(j = 0; j < mysys.agent[i].degree; j++)
+		for(j = 0; j < mysys.agent[i].contact_degree; j++)
 		{
-                        neighbor = mysys.agent[i].neighbors[j];
+                        neighbor = mysys.agent[i].contact_links[j];
 			hab = homophily(mysys.agent[i], mysys.agent[neighbor]);
 			if((0.00 < hab) && (hab < 1.00))
 				return 1;
