@@ -94,7 +94,11 @@ class Axl_network(nx.Graph, C.Structure):
                 self.agent[i].opinion_degree = 8
                 self.agent[i].opinion_links = (C.c_int * 200)()
 
-            self.node[i] = self.agent[i]	    
+            self.node[i] = self.agent[i]	   
+
+        if self.rewiring == 1:
+            libc.init_network.argtypes = [C.POINTER(Axl_network)]
+            libc.init_network(C.byref(self)) 
 
 
     def init_agents(self, n, f, q, q_z, A, ff):

@@ -15,7 +15,7 @@ mysys.evol_opinion = 1
 mysys.opinion_included = 1
 mysys.phi = 0.01
 
-mysys.set_topology(2.1, rewiring = 0)
+mysys.set_topology(2.1, rewiring = 1)
 
 for i in range(1000):
 
