@@ -1,6 +1,6 @@
 
 import random as rand
-import community
+#import community
 
 def zealots_list(N,Z):
 
@@ -9,7 +9,7 @@ def zealots_list(N,Z):
     B=rand.sample(A,number_zealots)
     
     return B
-    
+"""   
 def avg_neigh_degree(G):
     
     mean = sum(G.degree().values())/float(len(G))
@@ -21,3 +21,4 @@ def get_modularity(G):
     partition = community.best_partition(G)
     
     return community.modularity(partition, G)    
+"""
