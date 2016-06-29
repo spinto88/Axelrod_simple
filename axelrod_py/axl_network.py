@@ -5,7 +5,6 @@ import random as rand
 import numpy as np
 import set_topology as setop
 from axl_agent import *
-#from axl_mass_media import *
 
 
 libc = C.CDLL(os.getcwd() + '/axelrod_py/libc.so')
@@ -87,6 +86,7 @@ class Axl_network(nx.Graph, C.Structure):
         self.rewiring = rewiring
 
         for i in range(0, self.number_of_nodes()):
+
             self.agent[i].contact_degree = self.degree(i)
             self.agent[i].contact_links = (C.c_int * self.degree(i))(*self.neighbors(i))
 
@@ -95,10 +95,6 @@ class Axl_network(nx.Graph, C.Structure):
                 self.agent[i].opinion_links = (C.c_int * 200)()
 
             self.node[i] = self.agent[i]	    
-
-	if self.rewiring == 1:
-	    libc.init_network.argtypes = [C.POINTER(Axl_network)]
-	    libc.init_network(C.byref(self))
 
 
     def init_agents(self, n, f, q, q_z, A, ff):
@@ -123,7 +119,7 @@ class Axl_network(nx.Graph, C.Structure):
             self.agent[item].opinion = self.q_z
 
             
-    def set_equal_initial_state(self, feature = 'opinion', value = 0)
+    def set_equal_initial_state(self, feature = 'opinion', value = 0):
 
         if feature == 'opinion':
             for i in range(0, self.nagents):
@@ -181,7 +177,7 @@ class Axl_network(nx.Graph, C.Structure):
     def adherents_hist(self, fname = ''):
         
         adherents = self.adherents_distribution()[0]
-        q_z = self..q_z
+        q_z = self.q_z
 
         import matplotlib.pyplot as plt
 
@@ -400,7 +396,7 @@ class Axl_network(nx.Graph, C.Structure):
 
             N = self.nagents
             n = int(N ** 0.5)
-            q_z = self.agent[0].q_z
+            q_z = self.q_z
             matrix = []
             for i in range(0, n):
                 row = []
@@ -439,7 +435,7 @@ class Axl_network(nx.Graph, C.Structure):
 
             N = self.nagents
             n = int(N ** 0.5)
-            q_z = self.agent[0].q_z
+            q_z = self.q_z
             matrix = []
             for i in range(0, n):
                 row = []
@@ -460,7 +456,6 @@ class Axl_network(nx.Graph, C.Structure):
 
             cmap = colors.ListedColormap(['red', 'green'])
             bounds=[0, 0.1, 1]
-#            plt.imshow(matrix, interpolation='nearest', origin='lower',cmap=cmap, norm=norm)
 
             plt.imshow(matrix, interpolation = 'nearest', cmap = cmap, norm = norm)
 
