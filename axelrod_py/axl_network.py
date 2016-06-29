@@ -268,35 +268,39 @@ class Axl_network(nx.Graph, C.Structure):
         index_max = labels.argmax()
 
         # feat0_distribution returns a dictionary with all clusters in the system, 
-	# its first feature and size
+	# its opinion and size
         if(type_search == 0):
+
             opinion_distribution = []
             opinion_distribution_size = []
             for i in range(0, len(labels)):
                 if labels[i] != 0:
-                    opinion_distribution.append({'First feature': self.agent[i].opinion, 'Size': labels[i]})
+                    opinion_distribution.append({'Opinion': self.agent[i].opinion, 'Size': labels[i]})
                     opinion_distribution_size.append(labels[i])
+
         elif(type_search == 1):
-            vaccine_distribution = []
-           
+
+            vaccine_distribution = []           
             for i in range(0, len(labels)):
                 if labels[i] != 0:
-                    vaccine_distribution.append([self.agent[i].vaccine,labels[i],i])
+                    vaccine_distribution.append([self.agent[i].vaccine, labels[i], i])
+
         elif(type_search == 10):
-            cluster_distribution = []
-           
+
+            cluster_distribution = []           
             for i in range(0, len(labels)):
                 if labels[i] != 0:
                     cluster_distribution.append(labels[i])        
                     
-                    
         if(clustering_radio == 0 and type_search == 0):
             # feat is the first feature of the biggest fragment
-            feat = self.agent[index_max].feat[0]
-            return size_max, feat, feat0_distribution
+            feat = self.agent[index_max].opinion
+            return size_max, feat, opinion_distribution
+
        	elif(clustering_radio != 0 and type_search == 0):
             # Size of the biggest fragment and size distribution
-	    return size_max, feat0_distribution_size
+	    return size_max, opinion_distribution_size
+
 	elif(type_search == 1):
 	    # Returns Size cluster max no vaccinated, distribution of vaccinated and not, label of the cluster max of no vaccinated
             no_vaccine_data = []
@@ -306,9 +310,9 @@ class Axl_network(nx.Graph, C.Structure):
                     no_vaccine_data.append(item[1])
                     no_vaccine_label.append(item[2])
             if(no_vaccine_data == []):
-                no_vaccine_data.append(0)
-            
+                no_vaccine_data.append(0)            
             return np.max(no_vaccine_data),no_vaccine_data,no_vaccine_label[no_vaccine_data.index(np.max(no_vaccine_data))]
+
 	elif(type_search == 10):
 	    return size_max, cluster_distribution           
 
@@ -496,6 +500,11 @@ class Axl_network(nx.Graph, C.Structure):
 
 
     def extract_network(self):
+
+        """ 
+	It creates a graph where the neighbors of the node i are the contact and opinion links.
+	It can be used for studying the network's topology after an evolution with rewiring
+        """
 
         graph = nx.Graph()
 
