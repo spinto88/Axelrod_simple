@@ -48,7 +48,7 @@ class Axl_network(nx.Graph, C.Structure):
 
         self.evol_opinion = 0
         self.opinion_included = 0
-   
+
 
     def subgraph_max(self):
         # Return a copy of 
@@ -123,12 +123,16 @@ class Axl_network(nx.Graph, C.Structure):
             self.agent[item].opinion = self.q_z
 
             
-    def set_initial_state_equal(self, feature):
+    def set_equal_initial_state(self, feature = 'opinion', value = 0)
 
-        for i in range(0, self.nagents):
+        if feature == 'opinion':
+            for i in range(0, self.nagents):
+                if self.agent[i].zealot == 0:
+                    self.agent[i].opinion = value
 
-            if self.agent[i].zealot == 0:
-                self.agent[i].feat[0] = feature
+        else:
+            for i in range(0, self.nagents):
+                self.agent[i].feat[feature] = value
 
 
     def set_number_of_fixed_features(self, ff):
@@ -188,6 +192,7 @@ class Axl_network(nx.Graph, C.Structure):
         plt.hist(range(0, q_z + 1), bins = q_z + 1, weights = adherents, normed = True)
         plt.xlabel('Q value of the opinion')
         plt.ylabel('Normalized histogram')
+
         if fname == '':
             figure.canvas.draw()
         else:
@@ -211,7 +216,7 @@ class Axl_network(nx.Graph, C.Structure):
         """
         Takes the network and decides randomly who gets the vaccine and who does not, depending on the value of the first feature of each agent
         """
-        q_z = self..q_z 
+        q_z = self.q_z 
         
         for i in range(0,self.nagents):
         
@@ -222,6 +227,10 @@ class Axl_network(nx.Graph, C.Structure):
                 self.agent[i].vaccine = 0
             else:
                 self.agent[i].vaccine = 1
+
+        vaccinated = self.vaccinated_counter()
+        
+        return vaccinated
 
 
     def evolution(self, steps = 1):

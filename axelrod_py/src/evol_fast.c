@@ -47,9 +47,11 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 
 		if(mysys->evol_opinion == 0)
 			evolution(mysys, neighbors, rand());
+
                 else if(mysys->evol_opinion == 1)
 			evolution_op(mysys, neighbors, rand());
-		
+	
+	
 		if(mysys->rewiring == 1)
 			rewiring(mysys, rand());
 

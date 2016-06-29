@@ -19,30 +19,13 @@ struct _axl_agent
 	int *feat; /*!< Cutural vector with f components.*/
 	double zealot; /* Probability to be zealot */
 	int vaccine; /* To vaccine or not to vaccine, that is the cuestion...*/
-	int label;
+	int label; /* Label useful for the fragment identifier */
 	int contact_degree; /* Degree of the list of contact neighbors */
 	int *contact_links; /* List of neighbors which are contact links */
 	int opinion_degree; /* Degree of the list of only opinion neighbors */
 	int *opinion_links; /* List of neighbors which are opinion links */
 };
 typedef struct _axl_agent axl_agent; /*!< struct _axl_agent redefined as axl_agent. */
-#endif
-
-#ifndef AXL_MASS_MEDIA
-#define AXL_MASS_MEDIA
-/* Axelrod Mass Media
-*/
-struct _axl_mass_media
-{
-	int f; // Number of features
-	int q; // Number of traits per feature
-	int *feat; // Cultural vector
-	double b; // Strengh of the media
-	int strategy; // Strategy of adaptation
-	int edit_secc; // Editorial section: feature which doesn't change
-	int edit_line; // Trait of the editorial section
-};
-typedef struct _axl_mass_media axl_mass_media;
 #endif
 
 #ifndef AXL_NETWORK
@@ -56,8 +39,6 @@ struct _axl_network
 	int nagents; /* Number of axelrod agents in the network */
 	axl_agent *agent; /* Vector of axelrod agents */
         double noise; /* Rate of noise */
-        double b;
-        int mode_mf; /*1 active, 0 inactive*/
         double phi;
 	int evol_opinion;
 	int opinion_included;
