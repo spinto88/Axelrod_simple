@@ -5,7 +5,7 @@ import random as rand
 import numpy as np
 import set_topology as setop
 from axl_agent import *
-from axl_mass_media import *
+#from axl_mass_media import *
 
 
 libc = C.CDLL(os.getcwd() + '/axelrod_py/libc.so')
@@ -19,14 +19,12 @@ class Axl_network(nx.Graph, C.Structure):
     _fields_ = [('nagents', C.c_int),
                 ('agent', C.POINTER(Axl_agent)),
                 ('noise', C.c_double),
-		('mass_media', Axl_mass_media),
-		('b', C.c_double),
-                ('mode_mf', C.c_int),
 		('phi', C.c_double),
 		('evol_opinion', C.c_int),
+                ('opinion_included', C.c_int),
 		('rewiring', C.c_int)]
 
-    def __init__(self, n, f, q, q_z = 100, ff = 0, id_topology = 'Nan', net_parameters = {}, b = 0.00, mode_mf = 0, phi = 0.0, A = [], noise = 0.00, rewiring = 0):
+    def __init__(self, n, f, q, q_z = 100, ff = 0, id_topology = 'Nan', net_parameters = {}, phi = 0.0, A = [], noise = 0.00):
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
 	"""
@@ -41,18 +39,15 @@ class Axl_network(nx.Graph, C.Structure):
         self.noise = noise
  
         # Init mass media or external scalar field
-        self.mass_media = Axl_mass_media(f, q)
-        self.b = b
-        self.mode_mf = mode_mf
 	self.phi = phi
         self.n = n
-	self.rewiring = rewiring
+        self.q_z = q_z
         # Init topology
         if id_topology != 'Nan':
             self.set_topology(id_topology, net_parameters)
 
         self.evol_opinion = 0
-
+        self.opinion_included = 0
    
 
     def subgraph_max(self):
@@ -78,7 +73,8 @@ class Axl_network(nx.Graph, C.Structure):
       
         return H, maximo, distribution 
 
-    def set_topology(self, id_topology, parameters = {}):
+
+    def set_topology(self, id_topology, parameters = {}, rewiring = 0):
         """
         Set the network's topology
         """
@@ -88,14 +84,22 @@ class Axl_network(nx.Graph, C.Structure):
 
         self.nagents = self.number_of_nodes()
 
+        self.rewiring = rewiring
+
         for i in range(0, self.number_of_nodes()):
             self.agent[i].contact_degree = self.degree(i)
             self.agent[i].contact_links = (C.c_int * self.degree(i))(*self.neighbors(i))
-            self.node[i] = self.agent[i]
+
+            if self.rewiring == 1:
+                self.agent[i].opinion_degree = 8
+                self.agent[i].opinion_links = (C.c_int * 200)()
+
+            self.node[i] = self.agent[i]	    
 
 	if self.rewiring == 1:
 	    libc.init_network.argtypes = [C.POINTER(Axl_network)]
 	    libc.init_network(C.byref(self))
+
 
     def init_agents(self, n, f, q, q_z, A, ff):
         """
@@ -111,29 +115,36 @@ class Axl_network(nx.Graph, C.Structure):
             self.agent[j].zealot = 1
             self.agent[j].opinion = q_z
 
+
     def set_zealots(self, A, type_z):
+
         for item in A:
             self.agent[item].zealot = type_z
+            self.agent[item].opinion = self.q_z
+
             
-    def set_initial_state_equal(self, feature = 0):
+    def set_initial_state_equal(self, feature):
 
         for i in range(0, self.nagents):
+
             if self.agent[i].zealot == 0:
                 self.agent[i].feat[0] = feature
+
 
     def set_number_of_fixed_features(self, ff):
     
         for i in range(0, self.nagents):
             self.agent[i].ff = ff
 
+
     def adherents_counter(self):
         """
-        Gives number of agents with the same q for the first feature, only for the q_z given
+        Gives number of agents with the same q for the opinion, only for the q_z given
         """
         libc.adherents_counter.argtypes = [Axl_network, C.c_int]
         libc.adherents_counter.restype = C.c_int
 
-        q_z = self.agent[0].q_z
+        q_z = self.q_z
         
         # The adherents have a q equal to qz
         adherents = libc.adherents_counter(self, q_z)
@@ -141,6 +152,7 @@ class Axl_network(nx.Graph, C.Structure):
         
         return adherents
     
+
     def adherents_distribution(self):
         """
         Gives a number of agents with the same q for the first feature, for all q
@@ -148,7 +160,7 @@ class Axl_network(nx.Graph, C.Structure):
         libc.adherents_counter.argtypes = [Axl_network, C.c_int]
         libc.adherents_counter.restype = C.c_int
         
-        q_z = self.agent[0].q_z
+        q_z = self.q_z
 
         adherents = np.zeros(q_z + 1)        
         for q in range(0, q_z + 1):
@@ -165,7 +177,7 @@ class Axl_network(nx.Graph, C.Structure):
     def adherents_hist(self, fname = ''):
         
         adherents = self.adherents_distribution()[0]
-        q_z = self.agent[0].q_z
+        q_z = self..q_z
 
         import matplotlib.pyplot as plt
 
@@ -174,12 +186,13 @@ class Axl_network(nx.Graph, C.Structure):
         figure.clf()
 
         plt.hist(range(0, q_z + 1), bins = q_z + 1, weights = adherents, normed = True)
-        plt.xlabel('Q value of the first feature')
+        plt.xlabel('Q value of the opinion')
         plt.ylabel('Normalized histogram')
         if fname == '':
             figure.canvas.draw()
         else:
 	    plt.savefig(fname)
+
     
     def vaccinated_counter(self):
         """
@@ -192,18 +205,19 @@ class Axl_network(nx.Graph, C.Structure):
                 vaccinated = vaccinated + 1 
         
         return vaccinated    
+
         
     def vaccinate(self):
         """
         Takes the network and decides randomly who gets the vaccine and who does not, depending on the value of the first feature of each agent
         """
-        q_z = self.agent[0].q_z 
+        q_z = self..q_z 
         
         for i in range(0,self.nagents):
         
-            aux = rand.randint(0, q_z)
+            aux = rand.randint(1, q_z)
             
-            if(aux < float(self.agent[i].opinion)):
+            if(aux <= self.agent[i].opinion):
                 # 0 means that the agent is not vaccinated
                 self.agent[i].vaccine = 0
             else:
@@ -220,51 +234,7 @@ class Axl_network(nx.Graph, C.Structure):
         libc.evol_fast(C.byref(self), steps, rand.randint(0, 10000))
 
 
-    def rewiring(self):
-
-        class Top_changes(C.Structure):
-            _fields_ = [('remove', C.c_int),
-			('add', C.c_int)]
-
-	changes = (Top_changes * self.nagents)()
-        edges2rm = []
-        edges2add = []
-        nodes_changed = []
-
-        libc.rewiring.argtypes = [Axl_network, C.POINTER(Top_changes)]
-
-	libc.rewiring(self, changes)
-
-        for i in range(0, self.nagents):
-            if changes[i].remove != -1:
-                edges2rm.append([i, changes[i].remove])
-                edges2add.append([i, changes[i].add])  
-
-        # This 'for' is made in order to keep the number of edges constant
-        for i in range(0, len(edges2rm)):    
-            edges2rm[i].sort()
-            edges2add[i].sort()
-            if (edges2add[i][0], edges2add[i][1]) in self.edges():
-                pass
-            else:
-                try:
-                    self.remove_edge(edges2rm[i][0], edges2rm[i][1])
-                    self.add_edge(edges2add[i][0], edges2add[i][1])
-                except:
-                    pass
-
-        # Update the list of neighbors
-        for i in range(0, self.nagents):
-            self.agent[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
-            self.agent[i].degree = self.degree(i)
-            self.agent[i].degree_opinion = self.degree(i) - self.agent[i].degree_contact
-            opinion_links = set(self.neighbors(i)) - set(self.agent[i].contact_links[:self.agent[i].degree_contact])
-
-            self.agent[i].opinion_links = (C.c_int * self.agent[i].degree_opinion)(*opinion_links)
-            
-
-
-    def fragment_identifier(self, clustering_radio = 0, type_search = 0):
+    def fragment_identifier(self, clustering_radio = 0, type_search = 0, opinion_links_included = 0):
         """
  	Fragment identifier: it returns the size of the biggest fragment, its state, 
 	and the cluster distribution.
@@ -277,7 +247,10 @@ class Axl_network(nx.Graph, C.Structure):
 
 	# This function puts in nodes_info[i].label the label of the node i, according to 
 	# the current criteria of identifing 
-        libc.fragment_identifier(C.byref(self), clustering_radio, type_search)
+        if self.rewiring != 1:
+            opinion_links_included = 0
+
+        libc.fragment_identifier(C.byref(self), clustering_radio, type_search, opinion_links_included)
 
         # After this, the vector labels has the label of each agent
         labels = np.zeros(n)
@@ -334,36 +307,40 @@ class Axl_network(nx.Graph, C.Structure):
 	elif(type_search == 10):
 	    return size_max, cluster_distribution           
 
-    def active_links(self):
+
+    def active_links(self, opinion_links_included = 0):
 
         """
 	Active links: it returns True if there are active links in the system.
         """
 	
-	libc.active_links.argtypes = [Axl_network]
+	libc.active_links.argtypes = [Axl_network, C.c_int]
 	libc.active_links.restype = C.c_int
 
-	return libc.active_links(self)
+	return libc.active_links(self, opinion_links_included)
 
 
-    def evol2convergence(self, check_steps = 100):
+    def evol2convergence(self, check_steps = 1000):
         """ 
 	Evolution to convergence: the system evolves until there is no active links, checking this by check_steps. Noise must be equal to zero.
         """
         if self.noise > 0.00:
-            print "Convergence cannot be reach with noise in the system"
-  
-        else:
-   	    steps = 0
-    	    while self.active_links() != 0:
-                self.evolution(check_steps)
-                
-                steps += check_steps
+            return "Convergence cannot be reach with noise in the system"
 
-	    return steps
+        if self.rewiring == 1:
+            opinion_links_included = 1
+        else:
+            opinion_links_included = 0
+ 
+        steps = 0
+    	while self.active_links(opinion_links_included) != 0:
+            self.evolution(check_steps)
+                
+            steps += check_steps
+
+	return steps
 
     
-
     def evol2stationary(self, epsilon = 0.01):
         """
         This function manages the system to a stationary state, where 
@@ -424,8 +401,8 @@ class Axl_network(nx.Graph, C.Structure):
 
             if fname != '':
                 np.savetxt(fname + '.txt', matrix)
-            plt.ion()
 
+            plt.ion()
             figure = plt.figure(1)
             figure.clf()
             plt.imshow(matrix, interpolation = 'nearest', vmin = 0, vmax = q_z)
@@ -438,7 +415,8 @@ class Axl_network(nx.Graph, C.Structure):
         else:
             print "The system's network is not a square lattice"
             pass
-            
+    
+        
     def image_vaccinated(self, fname = ''):
         """
         This method prints on screen the matrix of vaccinated agents, of course the system is a square lattice.
@@ -512,3 +490,23 @@ class Axl_network(nx.Graph, C.Structure):
 
         return effective_q
 
+
+    def extract_network(self):
+
+        graph = nx.Graph()
+
+        for i in range(self.number_of_nodes()):
+
+            for j in range(self.agent[i].contact_degree):
+
+                k = self.agent[i].contact_links[j]
+                if i < k:
+                    graph.add_edge(i, k)
+
+            for j in range(self.agent[i].opinion_degree):
+
+                k = self.agent[i].opinion_links[j]
+                if i < k:
+                    graph.add_edge(i, k)
+
+        return graph    

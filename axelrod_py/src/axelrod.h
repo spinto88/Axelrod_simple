@@ -56,15 +56,12 @@ struct _axl_network
 	int nagents; /* Number of axelrod agents in the network */
 	axl_agent *agent; /* Vector of axelrod agents */
         double noise; /* Rate of noise */
-        axl_mass_media mass_media;
         double b;
         int mode_mf; /*1 active, 0 inactive*/
         double phi;
 	int evol_opinion;
+	int opinion_included;
 	int rewiring;
 };
 typedef struct _axl_network axl_network;
 #endif
-
-
-

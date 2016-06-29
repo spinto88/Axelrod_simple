@@ -8,7 +8,6 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 	int *neighbors;
 	int total_degree;
 	double random;
-	axl_mass_media *mm = &(mysys->mass_media);
 
 	neighbors = (int *)malloc(sizeof(int) * n);
 
@@ -46,24 +45,10 @@ void evol_fast(axl_network *mysys, int steps, int seed)
 
 		}
 
-		if(mysys->mass_media.b != 0.00)
-		{
-			for(i = 0; i < n; i++)
-			{
-				/* Maybe the neighbour chosen is the Mass Media... */
-				if(((double)rand())/RAND_MAX < mysys->mass_media.b)
-					neighbors[i] = -1;
-			}
-		}
-
-		if(mysys->mass_media.strategy != 0)
-		{
-			/* Adaptation of the mass media */
-			for(i = 0; i < mysys->mass_media.f; i++)
-				adaptation(mm, *(mysys), i);
-		}
-
-		evolution_mf(mysys, neighbors, rand());
+		if(mysys->evol_opinion == 0)
+			evolution(mysys, neighbors, rand());
+                else if(mysys->evol_opinion == 1)
+			evolution_op(mysys, neighbors, rand());
 		
 		if(mysys->rewiring == 1)
 			rewiring(mysys, rand());

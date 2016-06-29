@@ -5,6 +5,6 @@
 #include "axelrod.h"
 #include "homophily.h"
 
-int active_links(axl_network);
+int active_links(axl_network, int);
 
 #endif

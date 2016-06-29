@@ -1,28 +1,25 @@
 
 from axelrod_py import *
 
-N = 1024
+N = 2500
 F = 10
 Q = 20
 
-rand.seed(1234510)
+rand.seed(123457)
+
+A = zealots_list(N, Z = 10)
+
+mysys = Axl_network(n = N, f = F, q = Q, ff = 0, A = A)
+
+mysys.evol_opinion = 1
+mysys.opinion_included = 1
+mysys.phi = 0.1
+
+mysys.set_topology(2.1, rewiring = 1)
 
 for i in range(1000):
 
-    mysys = Axl_network(n = N, f = F, q = Q, rewiring = 1)
+    mysys.evolution(100)
 
-    mysys.set_topology(2.0)
-
-#print mysys.agent[0].opinion_links[:8]
-#print mysys.agent[0].feat[:10]
-#print mysys.agent[0].opinion_degree
-
-    mysys.evolution(10)
-
-#    dist = []
-#    for i in range(N):
-#        dist.append(mysys.agent[i].opinion_degree)
-
-#plt.hist(dist, range = [0, 40], bins = 40)
-#plt.show()
-
+    mysys.image_opinion()
+    

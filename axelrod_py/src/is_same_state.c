@@ -9,7 +9,7 @@ int is_same_state(axl_agent agent1, axl_agent agent2, int clustering_radio, int 
 
         if(type_search == 0)
 	{
-		diff_q = abs(agent1.feat[0] - agent2.feat[0]);
+		diff_q = abs(agent1.opinion - agent2.opinion);
 
         	if(diff_q <= clustering_radio)
 			return 1;
@@ -23,9 +23,10 @@ int is_same_state(axl_agent agent1, axl_agent agent2, int clustering_radio, int 
 		else 
 			return 0;
         }
+
         else if(type_search == 10)
         {
-        	for(i=1;i<10;i++)
+        	for(i = 0; i < agent1.f; i++)
                 {
 			if(agent1.feat[i] != agent2.feat[i])
                         {

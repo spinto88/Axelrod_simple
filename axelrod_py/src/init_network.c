@@ -11,9 +11,6 @@ void init_network(axl_network *mysys)
 
 	for(i = 0; i < n; i++)
 	{
-		mysys->agent[i].opinion_degree = 8;
-		
-		mysys->agent[i].opinion_links = (int *)malloc(sizeof(int) * MAXIMUM_DEGREE);
 		distant_neighbors(mysys, i, list_of_neighbors);
 		for(j = 0; j < 8; j++)
 			mysys->agent[i].opinion_links[j] = list_of_neighbors[j];
@@ -29,8 +26,8 @@ void distant_neighbors(axl_network *mysys, int agent, int *list_of_neighbors)
 	int n2 = mysys->nagents;
 	int n = (int)sqrt(n2);
 
-	int x = agent % n2;
-	int y = agent / n2;
+	int x = agent % n;
+	int y = agent / n;
 
 	list_of_neighbors[0] = ((x + 2) + n) % n + ((y + n) % n) * n;
 	list_of_neighbors[1] = ((x + 2) + n) % n + (((y + 2) + n) % n) * n;

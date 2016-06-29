@@ -4,9 +4,9 @@
 
 #include <stdio.h>
 #include "axelrod.h"
-#include "evolution_mf.h"
+#include "evolution.h"
+#include "evolution_op.h"
 #include "noise.h"
-#include "adaptation.h"
 
 void evol_fast(axl_network *, int, int);
 

@@ -6,7 +6,7 @@
 #include <math.h>
 #include "axelrod.h"
 
-#define MAXIMUM_DEGREE 100
+#define MAXIMUM_DEGREE 200
 
 void init_network(axl_network *);
 

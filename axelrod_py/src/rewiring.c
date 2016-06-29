@@ -9,7 +9,7 @@ int agent_in_list(axl_network *, int, int);
 void rewiring(axl_network *mysys, int seed)
 {
 	int i, j;
-	int ind_old, ind_i;
+	int ind_old;
 	int new, old;
 	int agent;
 	int n = mysys->nagents;
@@ -30,7 +30,6 @@ void rewiring(axl_network *mysys, int seed)
 		swap(list_agents + i, list_agents + j);
 	}
 
-
 	for(i = 0; i < n; i++)
 	{
 		agent = list_agents[i];
@@ -45,26 +44,24 @@ void rewiring(axl_network *mysys, int seed)
 			while(agent_in_list(mysys, agent, new) == 1)
 				new = rand() % n;
 
-			h_old = homophily(mysys->agent[agent], mysys->agent[old]);
-			h_new = homophily(mysys->agent[agent], mysys->agent[new]);	
+			h_old = homophily(mysys->agent[agent], mysys->agent[old], mysys->opinion_included);
+			h_new = homophily(mysys->agent[agent], mysys->agent[new], mysys->opinion_included);	
 
 			if(h_new > h_old)
 			{
-				mysys->agent[agent].opinion_links[ind_old] = new;
-
-				mysys->agent[new].opinion_links[mysys->agent[new].opinion_degree] = agent;
-				mysys->agent[new].opinion_degree += 1;
-
 				for(j = 0; j < mysys->agent[old].opinion_degree; j++)
 				{
 					if(mysys->agent[old].opinion_links[j] == agent)
 					{
-						ind_i = j;
 
-						swap(&mysys->agent[old].opinion_links[ind_i], &mysys->agent[old].opinion_links[mysys->agent[old].opinion_degree - 1]);
+						swap(&mysys->agent[old].opinion_links[j], &mysys->agent[old].opinion_links[mysys->agent[old].opinion_degree - 1]);
 						mysys->agent[old].opinion_links[mysys->agent[old].opinion_degree - 1] = -1;
 						mysys->agent[old].opinion_degree -= 1;
 
+				                mysys->agent[agent].opinion_links[ind_old] = new;
+
+          				        mysys->agent[new].opinion_links[mysys->agent[new].opinion_degree] = agent;
+      				                mysys->agent[new].opinion_degree += 1;
 						break;
 					}
 				}
