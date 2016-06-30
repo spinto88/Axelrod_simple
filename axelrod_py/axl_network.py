@@ -23,7 +23,7 @@ class Axl_network(nx.Graph, C.Structure):
                 ('opinion_included', C.c_int),
 		('rewiring', C.c_int)]
 
-    def __init__(self, n, f, q, q_z = 100, ff = 0, id_topology = 'Nan', net_parameters = {}, phi = 0.0, A = [], noise = 0.00):
+    def __init__(self, n, f, q, q_z = 100, ff = 0, id_topology = 'Nan', net_parameters = {}, phi = 0.0, A = [], noise = 0.00, rewiring = 0):
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
 	"""
@@ -43,7 +43,7 @@ class Axl_network(nx.Graph, C.Structure):
         self.q_z = q_z
         # Init topology
         if id_topology != 'Nan':
-            self.set_topology(id_topology, net_parameters)
+            self.set_topology(id_topology, net_parameters, rewiring = rewiring)
 
         self.evol_opinion = 0
         self.opinion_included = 0
@@ -392,7 +392,7 @@ class Axl_network(nx.Graph, C.Structure):
         return steps, data3average 
     
 
-    def image_opinion(self, fname = ''):
+    def image_opinion(self, fname = '', conf = ''):
         """
         This method prints on screen the matrix of first features, of course the system is a square lattice.
         It is not confident if q is larger than 63.
@@ -418,10 +418,14 @@ class Axl_network(nx.Graph, C.Structure):
             plt.ion()
             figure = plt.figure(1)
             figure.clf()
+            if(conf != ''):
+                label = str(conf)
+                ax = figure.add_subplot(111)
+                ax.text(2, 6, label , bbox={'facecolor':'white', 'alpha':0.8, 'pad':10}, fontsize=15)
             plt.imshow(matrix, interpolation = 'nearest', vmin = 0, vmax = q_z)
             plt.colorbar()
             if fname != '':
-                plt.savefig(fname + '.png')
+                plt.savefig(fname + '.png', bbox_inches='tight')
             else:
                 figure.canvas.draw()
 
@@ -430,7 +434,7 @@ class Axl_network(nx.Graph, C.Structure):
             pass
     
         
-    def image_vaccinated(self, fname = ''):
+    def image_vaccinated(self, fname = '', conf = ''):
         """
         This method prints on screen the matrix of vaccinated agents, of course the system is a square lattice.
         It is not confident if q is larger than 63.
@@ -461,7 +465,10 @@ class Axl_network(nx.Graph, C.Structure):
 
             figure = plt.figure(2)
             figure.clf()
-
+            if(conf != ''):
+                label = str(conf)
+                ax = figure.add_subplot(111)
+                ax.text(2, 6, label , bbox={'facecolor':'white', 'alpha':0.8, 'pad':10}, fontsize=15)
             cmap = colors.ListedColormap(['red', 'green'])
             bounds=[0, 0.1, 1]
 
@@ -470,7 +477,7 @@ class Axl_network(nx.Graph, C.Structure):
             plt.colorbar(cmap=cmap, norm=norm, boundaries=bounds, ticks=[0, 1])
 
             if fname != '':
-                plt.savefig(fname + '.png')
+                plt.savefig(fname + '.png', bbox_inches='tight')
             else:
                 figure.canvas.draw()
 
