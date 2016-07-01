@@ -1,6 +1,9 @@
 import networkx as nx
 import random as rnd
 import ctypes as C
+import numpy as np
+import os
+import sys
 
 def set_topology(G, id_topology, parameters = {}):
  
@@ -91,4 +94,28 @@ def set_topology(G, id_topology, parameters = {}):
 	       G.add_edge(i,Neigh3)
            if(Neigh4 < number_of_nodes and ((Neigh4 + 1) % n) != 0):
                G.add_edge(i,Neigh4)
+
+
+    elif id_topology == 'facebook':
+        """ 
+        Facebook network from http://snap.stanford.edu/data/egonets-Facebook.html
+        """
+        path = os.getcwd() + '/axelrod_py/net'
+        data = np.loadtxt(path + '/facebook_combined.txt')
+
+        nodes = []
+        for edge in data:
+            nodes.append(int(edge[0]))
+            nodes.append(int(edge[1]))
+
+        number_of_nodes = len(set(nodes))
+
+        if G.number_of_nodes() < number_of_nodes:
+            print "Number of nodes must be bigger than " + str(number_of_nodes)
+            sys.exit()
+
+        else:
+            for edge in data:
+                G.add_edge(int(edge[0]), int(edge[1]))
+            G.remove_nodes_from(range(number_of_nodes, G.number_of_nodes()))
 
