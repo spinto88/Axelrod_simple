@@ -53,7 +53,7 @@ class Axl_network(nx.Graph, C.Structure):
         # Return a copy of 
         
         #self.set_topology(id_topology = 2.1)
-        maximo, distribution, label_max = self.fragment_identifier(type_search = 1)
+        maximo, distribution, label_max = self.fragment_identifier(type_search = 1, opinion_links_included = 1)
 
         nbunch = []
         
@@ -65,8 +65,8 @@ class Axl_network(nx.Graph, C.Structure):
 	
         for i in nbunch:
             H.add_node(i)
-            for j in range(0,self.agent[i].degree):
-                node = self.agent[i].neighbors[j]
+            for j in range(0,self.agent[i].contact_degree):
+                node = self.agent[i].contact_links[j]
                 if((i>node) and (node in nbunch)):
                     H.add_edge(i,node)
       

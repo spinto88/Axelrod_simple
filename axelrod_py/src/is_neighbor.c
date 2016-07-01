@@ -1,7 +1,7 @@
 
 #include "is_neighbor.h"
 
-int is_neighbor(axl_agent agent1, int ind_agent2, int opinion_links_included)
+int is_neighbor(axl_agent agent1, int ind_agent2, int opinion_links_included, int type_search)
 {
 /**
 It sees if the index of the agent 2 is in the list of neighbors of agent 1.
@@ -14,7 +14,7 @@ It sees if the index of the agent 2 is in the list of neighbors of agent 1.
 			return 1;
 	}
 
-	if(opinion_links_included == 1)
+	if(opinion_links_included == 1, type_search != 1)
 	{
 	    for(i = 0; i < agent1.opinion_degree; i++)
    	    {
