@@ -42,3 +42,16 @@ def set_topology(G, N):
 	"""
         number_of_nodes = N
         nx.complete_graph(N, G)
+
+
+    elif G.id_topology == 2.0:
+        """ 
+	Graph tree.
+	"""
+	import numpy as np
+
+        number_of_nodes = N
+        nx.balanced_tree(2, int(np.log2(N)), create_using = G)
+	number_of_nodes = G.number_of_nodes()
+
+    return nx.adjacency_matrix(G)

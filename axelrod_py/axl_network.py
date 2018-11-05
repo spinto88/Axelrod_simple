@@ -19,11 +19,9 @@ class Axl_network(nx.Graph, C.Structure):
 
     _fields_ = [('nagents', C.c_int),
                 ('agent', C.POINTER(Axl_agent)),
-                ('noise', C.c_double),
-		('number_of_metric_feats', C.c_int)]
+                ('noise', C.c_double)]
 
-
-    def __init__(self, n, f, q, id_topology = 0.0, noise = 0.00, number_of_metric_feats = 0):
+    def __init__(self, n, f, q, id_topology = 0.0, noise = 0.00):
         """
         Constructor: initializes the network.Graph first, and set the topology and the agents' states. 
 	"""
@@ -38,14 +36,14 @@ class Axl_network(nx.Graph, C.Structure):
         self.init_agents(f, q)
 
         self.noise = noise
-	self.number_of_metric_feats = number_of_metric_feats
-
 
     def topology_init(self, n):
         """
         Initialize the network's topology
         """
-        setop.set_topology(self, n)
+        am = setop.set_topology(self, n)
+
+        self.adjacency_matrix = am
 
 
     def init_agents(self, f, q):
@@ -55,7 +53,7 @@ class Axl_network(nx.Graph, C.Structure):
     
         for i in range(0, self.nagents):
             self.agent[i] = Axl_agent(f, q)
-            self.node[i] = self.agent[i]
+            #self.node[i] = self.agent[i]
 
 
     def evolution(self, steps = 1):
@@ -119,6 +117,20 @@ class Axl_network(nx.Graph, C.Structure):
 		nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
 
 	return libc.active_links(self, nodes_info)
+
+    def corr_matrix(self):
+
+        cm = np.zeros([self.nagents, self.nagents], dtype = np.float)
+
+        for i in range(self.nagents):
+            for j in range(i+1, self.nagents):
+                cm[i][j] = self.agent[i].homophily(self.agent[j])
+
+        cm += cm.T
+        for i in range(self.nagents):
+            cm[i][i] = 1.00
+
+        return cm
 
 
     def evol2convergence(self, check_steps = 100):

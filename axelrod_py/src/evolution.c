@@ -46,27 +46,7 @@ void evolution(axl_network *mysys, int *neighbors, int seed)
 				r = (r+1)%f;
 
 			Changes[i].x = r;
-			
-			/* Here we looks if f in one of metric features */
-                        if(r <  mysys->number_of_metric_feats)
-			{
-				/* Differences between Q values */
-				diff_q = mysys->agent[i].feat[r] - mysys->agent[j].feat[r];
-
-				/* The new value is the actual value plus (less) a random value inside the difference */
-				if(diff_q > 0)
-					Changes[i].value = mysys->agent[i].feat[r] - (rand() % (diff_q + 1));
-				else
-				{	
-					/* Put the difference greater than zero */
-					diff_q = (-1 * diff_q);
-					Changes[i].value = mysys->agent[i].feat[r] + (rand() % (diff_q + 1));
-				}
-			}
-			/* Else (if it is not metric) take the exact feature of j */
-			else     		        
-				Changes[i].value = mysys->agent[j].feat[r];
-			
+			Changes[i].value = mysys->agent[j].feat[r];
 	    	
 	 	}
 
