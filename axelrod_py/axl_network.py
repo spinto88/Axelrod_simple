@@ -51,26 +51,29 @@ class Axl_network(nx.Graph, C.Structure):
         Iniatialize the agents' state.
         """
     
-        for i in range(0, self.nagents):
+        for i in range(self.nagents):
             self.agent[i] = Axl_agent(f, q)
-            #self.node[i] = self.agent[i]
 
+        nodes_info = (Axl_node * self.nagents)()
+        for i in range(self.nagents):
+            nodes_info[i].degree = self.degree(i)
+            nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
 
-    def evolution(self, steps = 1):
+	self.nodes_info = nodes_info
+
+    def evolution(self, steps = 1, evol_type = 'syncro'):
         """
 	Make steps synchronius evolutions of the system
         """
 
         n = self.nagents
 
-        libc.evol_fast.argtypes = [C.POINTER(Axl_network), C.POINTER(Axl_node), C.c_int, C.c_int]
+        libc.evol_fast.argtypes = [C.POINTER(Axl_network), C.POINTER(Axl_node), C.c_int, C.c_int, C.c_int]
 
-        nodes_info = (Axl_node * n)()
-        for i in range(0, n):
-            nodes_info[i].degree = self.degree(i)
-            nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
+        if evol_type == 'syncro':
+	    et = 1 
 
-        libc.evol_fast(C.byref(self), nodes_info, steps, rand.randint(0, 10000))
+        libc.evol_fast(C.byref(self), self.nodes_info, et, steps, rand.randint(0, 10000))
 
 
     def fragment_identifier(self):
@@ -81,17 +84,11 @@ class Axl_network(nx.Graph, C.Structure):
         n = self.nagents
         libc.fragment_identifier.argtypes = [Axl_network, C.POINTER(Axl_node)]
       
-        nodes_info = (Axl_node * n)()
-
-        for i in range(0, n):
-            nodes_info[i].degree = self.degree(i)
-            nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
-
-        libc.fragment_identifier(self, nodes_info)
+        libc.fragment_identifier(self, self.nodes_info)
 
         labels = np.zeros(n)
         for i in range(0, n):
-            labels[nodes_info[i].label] += 1
+            labels[self.nodes_info[i].label] += 1
 
         size_max = labels.max()
         index_max = labels.argmax()
@@ -110,13 +107,7 @@ class Axl_network(nx.Graph, C.Structure):
 	libc.active_links.argtypes = [Axl_network, C.POINTER(Axl_node)]
 	libc.active_links.restype = C.c_int
 
-        nodes_info = (Axl_node * n)()
-
-	for i in range(0, n):
-		nodes_info[i].degree = self.degree(i)
-		nodes_info[i].neighbors = (C.c_int * self.degree(i))(*self.neighbors(i))
-
-	return libc.active_links(self, nodes_info)
+	return libc.active_links(self, self.nodes_info)
 
     def corr_matrix(self):
 
@@ -133,7 +124,7 @@ class Axl_network(nx.Graph, C.Structure):
         return cm
 
 
-    def evol2convergence(self, check_steps = 100):
+    def evol2convergence(self, check_steps = 100, evol_type = 'syncro'):
         """ 
 	Evolution to convergence: the system evolves until there is no active links, checking this by check_steps. Noise must be equal to zero.
         """
@@ -143,7 +134,17 @@ class Axl_network(nx.Graph, C.Structure):
         else:
    	    steps = 0
     	    while self.active_links() != 0:
-                self.evolution(check_steps)
+                self.evolution(check_steps, evol_type)
                 steps += check_steps
 
 	    return steps
+
+    def one_step_evol(self, i, j):
+        """
+	Make one asynchronius step
+        """
+
+        if j in list(self.neighbors(i)):
+            libc.evolution_asyncro.argtypes = [C.POINTER(Axl_network), C.c_int, C.c_int, C.c_int]
+
+	    libc.evolution_asyncro(C.byref(self), i, j, rand.randint(0, 10000))

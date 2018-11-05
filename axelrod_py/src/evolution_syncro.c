@@ -1,10 +1,9 @@
-#include "evolution.h"
+#include "evolution_syncro.h"
 
-void evolution(axl_network *mysys, int *neighbors, int seed)
+void evolution_syncro(axl_network *mysys, int *neighbors, int seed)
 {
 	int i, j, f, r;	
         int n = mysys->nagents;
-        int diff_q;
         double h_ab, random;
 
         /* Struct feature which has the feature to change and the new value */

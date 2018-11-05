@@ -1,6 +1,6 @@
 
 CC = gcc 
-CFLAGS = -fPIC -O3
+CFLAGS = -fPIC -O3 -Wall
 LDFLAGS = -lm
 
 SRCDIR = src
@@ -18,4 +18,4 @@ libc.so: $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm $(SRCDIR)/*.o *.so *.pyc
+	rm -rfv $(SRCDIR)/*.o *.so *.pyc
